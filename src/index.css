@@ -1,0 +1,124 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* Tactical Luxury Theme */
+@theme {
+  /* Primary backgrounds */
+  --color-bg-primary: #0A0A0A;
+  --color-bg-secondary: #111111;
+  --color-bg-card: #1A1A1A;
+  --color-bg-elevated: #222222;
+
+  /* Accent colors */
+  --color-accent-orange: #FF6B00;
+  --color-accent-orange-dim: #CC5500;
+  --color-accent-teal: #00E5CC;
+  --color-accent-teal-dim: #00B8A3;
+
+  /* Neutrals */
+  --color-steel: #8A8A8A;
+  --color-steel-light: #AAAAAA;
+  --color-steel-dark: #5A5A5A;
+
+  /* Confidence indicators */
+  --color-confidence-high: #22C55E;
+  --color-confidence-medium: #EAB308;
+  --color-confidence-low: #EF4444;
+
+  /* Font families */
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* Base styles */
+html {
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg-primary);
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Utility classes for custom colors */
+.bg-primary { background-color: var(--color-bg-primary); }
+.bg-secondary { background-color: var(--color-bg-secondary); }
+.bg-card { background-color: var(--color-bg-card); }
+.bg-elevated { background-color: var(--color-bg-elevated); }
+
+.text-accent-orange { color: var(--color-accent-orange); }
+.text-accent-teal { color: var(--color-accent-teal); }
+.text-steel { color: var(--color-steel); }
+.text-steel-light { color: var(--color-steel-light); }
+
+.border-accent-orange { border-color: var(--color-accent-orange); }
+.border-accent-teal { border-color: var(--color-accent-teal); }
+.border-steel { border-color: var(--color-steel-dark); }
+
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+
+/* Scanning animation for processing state */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-scan {
+  animation: scan 2s ease-in-out infinite;
+}
+
+/* Subtle pulse for accents */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+/* Grid background pattern */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Card glow effect */
+.card-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 107, 0, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.card-glow:hover {
+  box-shadow:
+    0 0 0 1px rgba(255, 107, 0, 0.2),
+    0 4px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Upload zone dashed border */
+.upload-zone-border {
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%238A8A8A' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+}
+
+.upload-zone-border-active {
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23FF6B00' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+}
+
+/* Series badge styles */
+.badge-digital { background-color: #1E3A5F; color: #60A5FA; }
+.badge-analog { background-color: #3D1E5F; color: #A78BFA; }
+.badge-ana-digi { background-color: #1E5F4D; color: #34D399; }
