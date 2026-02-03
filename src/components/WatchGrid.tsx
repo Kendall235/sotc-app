@@ -7,7 +7,7 @@ interface WatchGridProps {
 
 export function WatchGrid({ watches }: WatchGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4">
       {watches.map((watch, index) => (
         <WatchTile key={`${watch.model_number}-${index}`} watch={watch} index={index} />
       ))}

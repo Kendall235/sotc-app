@@ -1,48 +1,73 @@
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Google Fonts - Heritage Palette */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
-/* Tactical Luxury Theme */
+/* DW-5000C Heritage Palette Theme */
 @theme {
-  /* Primary backgrounds */
-  --color-bg-primary: #0A0A0A;
-  --color-bg-secondary: #111111;
-  --color-bg-card: #1A1A1A;
-  --color-bg-elevated: #222222;
+  /* Resin Backgrounds (from watch case) */
+  --color-resin-deep: #0B0B0D;
+  --color-resin-dark: #111114;
+  --color-resin-mid: #1A1A1E;
+  --color-resin-light: #222228;
+  --color-resin-surface: #2A2A32;
 
-  /* Accent colors */
-  --color-accent-orange: #FF6B00;
-  --color-accent-orange-dim: #CC5500;
-  --color-accent-teal: #00E5CC;
-  --color-accent-teal-dim: #00B8A3;
+  /* Brick Red (bezel outline - primary accent) */
+  --color-brick: #C4342E;
+  --color-brick-dim: rgba(196, 52, 46, 0.15);
+  --color-brick-glow: rgba(196, 52, 46, 0.06);
+  --color-brick-border: rgba(196, 52, 46, 0.30);
 
-  /* Neutrals */
-  --color-steel: #8A8A8A;
-  --color-steel-light: #AAAAAA;
-  --color-steel-dark: #5A5A5A;
+  /* Gold (SHOCK RESIST shield - secondary accent) */
+  --color-gold: #D4A534;
+  --color-gold-dim: rgba(212, 165, 52, 0.12);
+  --color-gold-border: rgba(212, 165, 52, 0.25);
+  --color-gold-glow: rgba(212, 165, 52, 0.06);
 
-  /* Confidence indicators */
-  --color-confidence-high: #22C55E;
-  --color-confidence-medium: #EAB308;
-  --color-confidence-low: #EF4444;
+  /* LCD Green (classic display tint) */
+  --color-lcd: #B8C4A0;
+  --color-lcd-bright: #D0DDB8;
+  --color-lcd-dim: rgba(184, 196, 160, 0.10);
+  --color-lcd-segment: #3A3E32;
 
-  /* Font families */
-  --font-display: "Barlow Condensed", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  /* Text Hierarchy */
+  --color-text-primary: #E8E4DE;
+  --color-text-secondary: #A8A49E;
+  --color-text-tertiary: #8A8680;
+  --color-text-muted: #6E6A64;
+
+  /* Tag/Pill Styling */
+  --color-tag-bg: rgba(255, 255, 255, 0.10);
+  --color-tag-text: #B0ACA6;
+  --color-tag-border: rgba(255, 255, 255, 0.08);
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-warm: rgba(212, 165, 52, 0.12);
+
+  /* Confidence Indicators (Heritage) */
+  --color-confidence-high: #D4A534;
+  --color-confidence-medium: rgba(196, 52, 46, 0.6);
+  --color-confidence-low: #6E6A64;
+
+  /* Font Families */
+  --font-display: "Anton", sans-serif;
+  --font-mono: "Fira Code", monospace;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+  --font-logo: "Chakra Petch", sans-serif;
 }
 
 /* Base styles */
 html {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
-  background-color: var(--color-bg-primary);
-  color: #FFFFFF;
+  background-color: var(--color-resin-deep);
+  color: var(--color-text-primary);
   min-height: 100vh;
 }
 
@@ -50,25 +75,46 @@ body {
   min-height: 100vh;
 }
 
-/* Utility classes for custom colors */
-.bg-primary { background-color: var(--color-bg-primary); }
-.bg-secondary { background-color: var(--color-bg-secondary); }
-.bg-card { background-color: var(--color-bg-card); }
-.bg-elevated { background-color: var(--color-bg-elevated); }
+/* Background utility classes */
+.bg-primary { background-color: var(--color-resin-deep); }
+.bg-secondary { background-color: var(--color-resin-dark); }
+.bg-card { background-color: var(--color-resin-mid); }
+.bg-elevated { background-color: var(--color-resin-light); }
+.bg-surface { background-color: var(--color-resin-surface); }
 
-.text-accent-orange { color: var(--color-accent-orange); }
-.text-accent-teal { color: var(--color-accent-teal); }
-.text-steel { color: var(--color-steel); }
-.text-steel-light { color: var(--color-steel-light); }
+/* Accent colors */
+.text-brick { color: var(--color-brick); }
+.text-gold { color: var(--color-gold); }
+.text-lcd { color: var(--color-lcd); }
+.bg-brick { background-color: var(--color-brick); }
+.bg-gold { background-color: var(--color-gold); }
+.bg-lcd { background-color: var(--color-lcd); }
+.border-brick { border-color: var(--color-brick); }
+.border-gold { border-color: var(--color-gold); }
 
-.border-accent-orange { border-color: var(--color-accent-orange); }
-.border-accent-teal { border-color: var(--color-accent-teal); }
-.border-steel { border-color: var(--color-steel-dark); }
+/* Text hierarchy */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-muted { color: var(--color-text-muted); }
 
+/* Font families */
 .font-display { font-family: var(--font-display); }
 .font-mono { font-family: var(--font-mono); }
+.font-body { font-family: var(--font-body); }
+.font-logo { font-family: var(--font-logo); }
 
-/* Scanning animation for processing state */
+/* Scanning animation - horizontal sweep */
+@keyframes scan-horizontal {
+  0% { top: 5%; opacity: 1; }
+  100% { top: 95%; opacity: 0.4; }
+}
+
+.animate-scan-horizontal {
+  animation: scan-horizontal 2.8s ease-in-out infinite;
+}
+
+/* Legacy vertical scan animation */
 @keyframes scan {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100%); }
@@ -88,6 +134,36 @@ body {
   animation: subtle-pulse 2s ease-in-out infinite;
 }
 
+/* Progress bar animation */
+@keyframes progress-sweep {
+  0% { width: 20%; }
+  50% { width: 70%; }
+  100% { width: 20%; }
+}
+
+.animate-progress-sweep {
+  animation: progress-sweep 2.5s ease-in-out infinite;
+}
+
+/* Blink animation for cursor */
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Dot beat animation */
+@keyframes dot-beat {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.animate-dot-beat {
+  animation: dot-beat 1.6s ease-in-out infinite;
+}
+
 /* Grid background pattern */
 .bg-grid {
   background-image:
@@ -96,29 +172,337 @@ body {
   background-size: 40px 40px;
 }
 
-/* Card glow effect */
+/* Card glow effect - Heritage palette */
 .card-glow {
   box-shadow:
-    0 0 0 1px rgba(255, 107, 0, 0.1),
+    0 0 0 1px var(--color-border),
     0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .card-glow:hover {
   box-shadow:
-    0 0 0 1px rgba(255, 107, 0, 0.2),
+    0 0 0 1px var(--color-brick-border),
     0 4px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Upload zone dashed border */
+/* Upload zone dashed border - updated to use border color */
 .upload-zone-border {
-  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%238A8A8A' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%236E6A64' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
 }
 
 .upload-zone-border-active {
-  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23FF6B00' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23C4342E' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
 }
 
-/* Series badge styles */
-.badge-digital { background-color: #1E3A5F; color: #60A5FA; }
-.badge-analog { background-color: #3D1E5F; color: #A78BFA; }
-.badge-ana-digi { background-color: #1E5F4D; color: #34D399; }
+/* Corner accents for upload box - brick red L-shapes */
+.corner-accents {
+  position: relative;
+}
+
+.corner-accents::before,
+.corner-accents::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--color-brick);
+  border-style: solid;
+  opacity: 0.4;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.corner-accents::before {
+  top: 12px;
+  left: 12px;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+
+.corner-accents::after {
+  bottom: 12px;
+  right: 12px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+
+.corner-accents:hover::before,
+.corner-accents:hover::after {
+  opacity: 0.9;
+}
+
+/* Mobile corner accents - smaller */
+@media (max-width: 640px) {
+  .corner-accents::before,
+  .corner-accents::after {
+    width: 16px;
+    height: 16px;
+    top: 8px;
+    left: 8px;
+  }
+
+  .corner-accents::after {
+    top: auto;
+    left: auto;
+    bottom: 8px;
+    right: 8px;
+  }
+}
+
+/* LCD face styles */
+.lcd-face {
+  background-color: var(--color-lcd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.lcd-face::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border: 1.5px solid var(--color-brick);
+  border-radius: inherit;
+  opacity: 0.4;
+}
+
+.lcd-face-text {
+  font-family: var(--font-logo);
+  font-weight: 700;
+  color: var(--color-lcd-segment);
+  text-align: center;
+  line-height: 1;
+}
+
+/* Face shapes */
+.square-face {
+  width: 36px;
+  height: 42px;
+  border-radius: 5px;
+}
+
+.round-face {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.octagon-face {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+/* Bezel accent - left border for cards */
+.bezel-accent {
+  position: relative;
+}
+
+.bezel-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--color-brick), transparent);
+  opacity: 0.6;
+}
+
+/* Top bezel accent line */
+.bezel-top {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-brick), transparent);
+  opacity: 0.6;
+}
+
+/* Series progress bars */
+.series-bar {
+  flex: 1;
+  height: 5px;
+  background: var(--color-resin-deep);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.series-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease-out;
+}
+
+.series-bar-fill.brick {
+  background: var(--color-brick);
+}
+
+.series-bar-fill.gold {
+  background: var(--color-gold);
+}
+
+/* DNA bar segments */
+.dna-bar {
+  display: flex;
+  height: 34px;
+  border-radius: 6px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.dna-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  padding: 0 12px;
+}
+
+.dna-segment:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.dna-segment:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.dna-segment:only-child {
+  border-radius: 6px;
+}
+
+.dna-segment.brick {
+  background: var(--color-brick);
+  color: #fff;
+}
+
+.dna-segment.gold {
+  background: var(--color-gold);
+  color: #000;
+}
+
+.dna-segment.tertiary {
+  background: var(--color-resin-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.dna-segment.quaternary {
+  background: var(--color-resin-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* Scan line animation */
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 10%, var(--color-brick) 50%, transparent 90%);
+  box-shadow: 0 0 20px var(--color-brick), 0 0 60px rgba(196, 52, 46, 0.3);
+  animation: scan-horizontal 2.8s ease-in-out infinite;
+}
+
+/* Series badge styles - Heritage palette */
+.badge-digital { background-color: var(--color-brick-dim); color: var(--color-brick); }
+.badge-analog { background-color: var(--color-gold-dim); color: var(--color-gold); }
+.badge-ana-digi { background-color: var(--color-lcd-dim); color: var(--color-lcd); }
+
+/* Tag/pill styles */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: var(--color-tag-bg);
+  color: var(--color-tag-text);
+  letter-spacing: 0.5px;
+  border: 1px solid var(--color-tag-border);
+}
+
+/* Step number circles */
+.step-number {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-gold);
+  font-weight: 600;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-gold-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Rare badge - gold star */
+.rare-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 10px;
+  color: var(--color-gold);
+  text-shadow: 0 0 6px var(--color-gold);
+}
+
+/* Confidence indicator dots */
+.confidence-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.confidence-dot.high {
+  background: var(--color-confidence-high);
+}
+
+.confidence-dot.medium {
+  background: var(--color-confidence-medium);
+}
+
+.confidence-dot.low {
+  background: var(--color-confidence-low);
+}
+
+/* Primary button - brick red */
+.btn-primary {
+  padding: 10px 22px;
+  background: var(--color-brick);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(196, 52, 46, 0.3);
+}
+
+/* Ghost button */
+.btn-ghost {
+  padding: 10px 22px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}

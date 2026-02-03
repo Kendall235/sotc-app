@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import type { CollectionAnalysis } from '../types/collection';
 import { WatchGrid } from './WatchGrid';
 import { StatsBar } from './StatsBar';
+import { deriveCollectorDNA, getDNAFlexValues } from '../utils/collectorDNA';
 
 interface CollectionCardProps {
   analysis: CollectionAnalysis;
@@ -10,29 +11,37 @@ interface CollectionCardProps {
 
 export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
   function CollectionCard({ analysis, imageUrl }, ref) {
+    const dna = deriveCollectorDNA(analysis.watches);
+    const flexValues = getDNAFlexValues(dna);
+
     return (
       <div
         ref={ref}
-        className="overflow-hidden rounded-xl bg-secondary"
+        className="overflow-hidden rounded-2xl bg-resin-dark border border-[var(--color-border)]"
       >
+        {/* Brick red top bezel accent */}
+        <div className="bezel-top" />
+
         {/* Header */}
-        <div className="border-b border-steel-dark/30 bg-card px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="px-7 pt-6 pb-0">
+          <div className="flex items-start justify-between">
             <div>
-              <h2 className="font-display text-2xl font-bold text-white">
+              <h2 className="font-display text-[26px] uppercase tracking-wide text-primary leading-none">
                 G-Shock Collection
               </h2>
-              <p className="mt-1 text-sm text-steel">
-                State of the Collection
+              <p className="mt-1 font-mono text-[11px] text-secondary tracking-wider uppercase">
+                {new Date().toLocaleDateString('en-US', {
+                  month: 'short',
+                  year: 'numeric',
+                }).toUpperCase()} · SOTC
               </p>
             </div>
             <div className="text-right">
-              <div className="font-mono text-xs text-steel-dark">
-                {new Date().toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+              <div className="font-display text-5xl text-brick leading-none">
+                {analysis.total_watches}
+              </div>
+              <div className="font-mono text-[11px] text-secondary tracking-wider uppercase">
+                pieces
               </div>
             </div>
           </div>
@@ -40,7 +49,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
 
         {/* Original image thumbnail (optional) */}
         {imageUrl && (
-          <div className="border-b border-steel-dark/30 p-4">
+          <div className="border-b border-[var(--color-border)] p-4 mx-7 mt-4">
             <img
               src={imageUrl}
               alt="Original collection"
@@ -49,27 +58,48 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
           </div>
         )}
 
-        {/* Stats */}
-        <div className="p-4">
-          <StatsBar analysis={analysis} />
-        </div>
-
         {/* Watch grid */}
-        <div className="px-4 pb-4">
-          <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-steel">
-            Identified Pieces
-          </div>
+        <div className="px-7 pt-5 pb-4">
           <WatchGrid watches={analysis.watches} />
         </div>
 
+        {/* Stats */}
+        <div className="px-7 pb-4">
+          <StatsBar analysis={analysis} />
+        </div>
+
+        {/* Collector DNA bar */}
+        {dna.length > 0 && (
+          <div className="px-7 pb-5">
+            <div className="font-mono text-[11px] text-secondary tracking-widest uppercase mb-2.5">
+              Collector DNA
+            </div>
+            <div className="dna-bar">
+              {dna.map((archetype, index) => (
+                <div
+                  key={archetype.name}
+                  className={`dna-segment ${archetype.color}`}
+                  style={{ flex: flexValues[index] }}
+                >
+                  {archetype.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Footer watermark */}
-        <div className="border-t border-steel-dark/30 bg-card px-6 py-3">
+        <div className="border-t border-[var(--color-border)] px-7 py-3.5">
           <div className="flex items-center justify-between">
-            <span className="font-display text-sm font-semibold text-accent-orange">
-              SOTC.app
+            <span className="font-logo text-[13px] font-semibold tracking-widest">
+              <span className="text-brick">sotc</span>
+              <span className="text-secondary">.app</span>
             </span>
-            <span className="text-xs text-steel-dark">
-              Powered by Claude Vision AI
+            <span className="font-mono text-[11px] text-secondary tracking-wider">
+              {new Date().toLocaleDateString('en-US', {
+                month: 'short',
+                year: 'numeric',
+              }).toUpperCase()}
             </span>
           </div>
         </div>

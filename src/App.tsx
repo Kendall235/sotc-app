@@ -119,7 +119,7 @@ function App() {
         {state === 'error' && error && (
           <div className="space-y-6">
             {previewUrl && (
-              <div className="overflow-hidden rounded-lg">
+              <div className="overflow-hidden rounded-2xl border border-[var(--color-border)]">
                 <img
                   src={previewUrl}
                   alt="Upload preview"
@@ -140,7 +140,7 @@ function App() {
           <div className="space-y-6">
             {/* Low confidence warning */}
             {analysis.watches.some(w => w.confidence === 'low') && (
-              <div className="flex items-center gap-2 rounded-lg bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+              <div className="flex items-center gap-2 rounded-xl bg-gold/10 border border-[var(--color-gold-border)] px-4 py-3 text-sm text-gold">
                 <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -160,7 +160,7 @@ function App() {
               <DownloadButton targetRef={cardRef} />
               <button
                 onClick={handleNewUpload}
-                className="rounded-lg border border-steel-dark px-4 py-2.5 font-display font-semibold text-steel-light transition-colors hover:border-steel hover:text-white"
+                className="btn-ghost"
               >
                 Upload New Photo
               </button>

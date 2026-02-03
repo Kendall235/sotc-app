@@ -47,17 +47,17 @@ export function ErrorState({ error, onRetry, onReset }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       {/* Error icon */}
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brick/10 text-brick">
         {errorIcons[error.type]}
       </div>
 
       {/* Error title */}
-      <h3 className="font-display text-xl font-semibold text-white">
+      <h3 className="font-display text-xl text-primary uppercase tracking-wide">
         {errorTitles[error.type]}
       </h3>
 
       {/* Error message */}
-      <p className="mt-2 max-w-md text-steel">
+      <p className="mt-2 max-w-md text-secondary">
         {error.message}
       </p>
 
@@ -66,14 +66,14 @@ export function ErrorState({ error, onRetry, onReset }: ErrorStateProps) {
         {error.retryable && (
           <button
             onClick={onRetry}
-            className="rounded-lg bg-accent-orange px-4 py-2 font-display font-semibold text-white transition-colors hover:bg-accent-orange-dim"
+            className="btn-primary"
           >
             Try Again
           </button>
         )}
         <button
           onClick={onReset}
-          className="rounded-lg border border-steel-dark px-4 py-2 font-display font-semibold text-steel-light transition-colors hover:border-steel hover:text-white"
+          className="btn-ghost"
         >
           Upload Different Photo
         </button>

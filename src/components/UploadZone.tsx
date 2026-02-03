@@ -70,7 +70,7 @@ export function UploadZone({ onFileSelect, isProcessing, previewUrl }: UploadZon
 
   if (previewUrl) {
     return (
-      <div className="relative overflow-hidden rounded-lg bg-card">
+      <div className="relative overflow-hidden rounded-2xl bg-resin-dark border border-[var(--color-border)]">
         <img
           src={previewUrl}
           alt="Collection preview"
@@ -78,11 +78,16 @@ export function UploadZone({ onFileSelect, isProcessing, previewUrl }: UploadZon
         />
         {isProcessing && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="text-center">
-              <div className="relative h-1 w-48 overflow-hidden rounded-full bg-steel-dark">
-                <div className="animate-scan absolute inset-0 bg-gradient-to-b from-transparent via-accent-orange to-transparent" />
+            {/* Scan line */}
+            <div className="scan-line" />
+
+            <div className="text-center relative z-10">
+              <p className="font-mono text-sm text-brick mb-4 tracking-wide">
+                Identifying your collection<span className="animate-blink">_</span>
+              </p>
+              <div className="h-[3px] w-64 bg-resin-mid rounded overflow-hidden mx-auto">
+                <div className="h-full bg-brick animate-progress-sweep rounded" />
               </div>
-              <p className="mt-4 font-display text-lg text-white">Identifying your collection...</p>
             </div>
           </div>
         )}
@@ -99,10 +104,34 @@ export function UploadZone({ onFileSelect, isProcessing, previewUrl }: UploadZon
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         className={`
-          relative cursor-pointer rounded-lg p-8 sm:p-12 text-center transition-all duration-200
-          ${isDragActive ? 'upload-zone-border-active bg-elevated' : 'upload-zone-border bg-card hover:bg-elevated'}
+          relative cursor-pointer rounded-2xl p-12 text-center transition-all duration-300
+          border-[1.5px] overflow-hidden
+          ${isDragActive
+            ? 'border-[var(--color-brick-border)] bg-resin-dark'
+            : 'border-[var(--color-border)] bg-resin-dark hover:border-[var(--color-brick-border)] hover:-translate-y-0.5'
+          }
+          ${isDragActive ? 'shadow-[0_8px_40px_var(--color-brick-glow)]' : ''}
         `}
       >
+        {/* Corner accents - top-left and bottom-right via CSS */}
+        <div
+          className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-brick rounded-tl opacity-40 transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: isDragActive ? 0.9 : undefined }}
+        />
+        <div
+          className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-brick rounded-br opacity-40 transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: isDragActive ? 0.9 : undefined }}
+        />
+        {/* Corner accents - top-right and bottom-left */}
+        <div
+          className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-brick rounded-tr opacity-40 transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: isDragActive ? 0.9 : undefined }}
+        />
+        <div
+          className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-brick rounded-bl opacity-40 transition-opacity duration-300 pointer-events-none"
+          style={{ opacity: isDragActive ? 0.9 : undefined }}
+        />
+
         <input
           ref={inputRef}
           type="file"
@@ -111,11 +140,15 @@ export function UploadZone({ onFileSelect, isProcessing, previewUrl }: UploadZon
           className="hidden"
         />
 
-        <div className="space-y-4">
-          {/* Scan icon */}
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-secondary">
+        <div className="space-y-5">
+          {/* Upload icon in circle */}
+          <div className={`
+            mx-auto flex h-14 w-14 items-center justify-center rounded-full
+            border-[1.5px] transition-colors duration-300
+            ${isDragActive ? 'border-brick' : 'border-muted hover:border-brick'}
+          `}>
             <svg
-              className={`h-8 w-8 ${isDragActive ? 'text-accent-orange' : 'text-steel'}`}
+              className={`h-5 w-5 transition-colors duration-300 ${isDragActive ? 'text-brick' : 'text-tertiary'}`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -124,36 +157,49 @@ export function UploadZone({ onFileSelect, isProcessing, previewUrl }: UploadZon
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
           </div>
 
           <div>
-            <p className="font-display text-lg text-white">
-              {isDragActive ? 'Drop your collection photo' : 'Drop your collection photo here'}
-            </p>
-            <p className="mt-1 text-sm text-steel">
-              or <span className="text-accent-orange">click to browse</span>
+            <p className="text-[15px] font-medium text-primary">
+              {isDragActive ? 'Drop your collection photo' : 'Drop your collection photo '}
+              {!isDragActive && (
+                <span className="text-brick font-semibold cursor-pointer">or browse</span>
+              )}
             </p>
           </div>
 
-          <p className="text-xs text-steel-dark">
-            Supports JPEG, PNG, HEIC up to 10MB
+          <p className="font-mono text-xs text-secondary tracking-wider">
+            JPEG · PNG · HEIC · UP TO 10MB
           </p>
         </div>
 
         {/* Scanning line effect when dragging */}
         {isDragActive && (
-          <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
-            <div className="animate-scan absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-accent-orange to-transparent" />
+          <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+            <div className="scan-line" />
           </div>
         )}
+      </div>
+
+      {/* Steps */}
+      <div className="flex justify-center gap-10 pt-14 pb-10 flex-wrap">
+        <div className="flex items-center gap-2.5">
+          <span className="step-number">1</span>
+          <span className="text-sm text-secondary font-medium">Upload photo</span>
+        </div>
+        <div className="w-6 h-px bg-[var(--color-border)] self-center hidden sm:block" />
+        <div className="flex items-center gap-2.5">
+          <span className="step-number">2</span>
+          <span className="text-sm text-secondary font-medium">AI scans collection</span>
+        </div>
+        <div className="w-6 h-px bg-[var(--color-border)] self-center hidden sm:block" />
+        <div className="flex items-center gap-2.5">
+          <span className="step-number">3</span>
+          <span className="text-sm text-secondary font-medium">Share your SOTC</span>
+        </div>
       </div>
 
       {error && (

@@ -2,46 +2,48 @@ export function ProcessingState() {
   return (
     <div className="flex flex-col items-center justify-center py-16">
       {/* Scanning animation container */}
-      <div className="relative mb-8">
-        {/* Outer ring */}
-        <div className="h-24 w-24 rounded-full border-2 border-steel-dark" />
+      <div className="relative mb-8 w-full max-w-md">
+        {/* Fake image placeholder area */}
+        <div className="aspect-[4/3] bg-resin-dark rounded-2xl border border-[var(--color-border)] relative overflow-hidden">
+          {/* Fake watch grid shapes */}
+          <div className="grid grid-cols-4 gap-4 p-9 w-full opacity-25">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className={`aspect-square border-2 border-tertiary bg-resin-mid ${
+                  i % 2 === 0 ? 'rounded-lg' : 'rounded-full'
+                }`}
+              />
+            ))}
+          </div>
 
-        {/* Scanning line */}
-        <div className="absolute inset-0 overflow-hidden rounded-full">
-          <div className="animate-scan h-full w-full bg-gradient-to-b from-transparent via-accent-orange/50 to-transparent" />
-        </div>
-
-        {/* Center icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <svg
-            className="h-10 w-10 text-accent-orange animate-subtle-pulse"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
+          {/* Brick red scan line */}
+          <div className="scan-line" />
         </div>
       </div>
 
-      {/* Progress text */}
+      {/* Status section */}
       <div className="text-center">
-        <p className="font-display text-xl text-white">
-          Analyzing your collection...
+        <p className="font-mono text-sm text-brick mb-3.5 tracking-wide">
+          Identifying your collection<span className="animate-blink">_</span>
         </p>
-        <p className="mt-2 text-sm text-steel">
-          Identifying G-Shock models and series
-        </p>
-      </div>
 
-      {/* Progress bar */}
-      <div className="mt-6 h-1 w-64 overflow-hidden rounded-full bg-secondary">
-        <div className="h-full w-1/3 animate-pulse rounded-full bg-accent-orange" />
+        {/* Progress bar */}
+        <div className="h-[3px] w-64 bg-resin-mid rounded overflow-hidden mx-auto">
+          <div className="h-full bg-brick animate-progress-sweep rounded" />
+        </div>
+
+        {/* Scanning counts */}
+        <div className="mt-4 flex justify-center gap-5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-gold animate-dot-beat" />
+            <span className="font-mono text-xs text-secondary">Scanning</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-brick animate-dot-beat" style={{ animationDelay: '0.3s' }} />
+            <span className="font-mono text-xs text-secondary">Analyzing</span>
+          </div>
+        </div>
       </div>
     </div>
   );
