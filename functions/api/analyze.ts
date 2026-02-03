@@ -1,4 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk';
+interface Env {
+  ANTHROPIC_API_KEY: string;
+}
 
 // Simple in-memory rate limiting (resets on cold start)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -40,22 +42,12 @@ Also provide:
 
 Return ONLY valid JSON. If you cannot identify a watch clearly, include it with confidence: "low".`;
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(request: Request) {
-  // Only allow POST
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ success: false, error: 'Method not allowed', type: 'api_error' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const { request, env } = context;
 
   // Get client IP for rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-             request.headers.get('x-real-ip') ||
+  const ip = request.headers.get('cf-connecting-ip') ||
+             request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
              'unknown';
 
   // Check rate limit
@@ -71,7 +63,7 @@ export default async function handler(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json() as { image?: string };
     const { image } = body;
 
     if (!image || typeof image !== 'string') {
@@ -98,42 +90,62 @@ export default async function handler(request: Request) {
       });
     }
 
-    const mediaType = match[1] as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+    const mediaType = match[1];
     const base64Data = match[2];
 
-    // Initialize Anthropic client
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+    // Call Claude Vision API directly
+    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mediaType,
+                  data: base64Data,
+                },
+              },
+              {
+                type: 'text',
+                text: ANALYSIS_PROMPT,
+              },
+            ],
+          },
+        ],
+      }),
     });
 
-    // Call Claude Vision API
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: base64Data,
-              },
-            },
-            {
-              type: 'text',
-              text: ANALYSIS_PROMPT,
-            },
-          ],
-        },
-      ],
-    });
+    if (!anthropicResponse.ok) {
+      const errorText = await anthropicResponse.text();
+      console.error('Anthropic API error:', errorText);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'AI service error. Please try again.',
+        type: 'api_error',
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const response = await anthropicResponse.json() as {
+      content: Array<{ type: string; text?: string }>;
+    };
 
     // Extract text content
     const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
+    if (!textContent || !textContent.text) {
       return new Response(JSON.stringify({
         success: false,
         error: 'No analysis returned from AI',
@@ -156,32 +168,55 @@ export default async function handler(request: Request) {
       analysisData = JSON.parse(jsonString.trim());
     } catch {
       // Retry once if parsing fails
-      const retryResponse = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType,
-                  data: base64Data,
+      const retryResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image',
+                  source: {
+                    type: 'base64',
+                    media_type: mediaType,
+                    data: base64Data,
+                  },
                 },
-              },
-              {
-                type: 'text',
-                text: ANALYSIS_PROMPT + '\n\nIMPORTANT: Return ONLY raw JSON without any markdown formatting or code blocks.',
-              },
-            ],
-          },
-        ],
+                {
+                  type: 'text',
+                  text: ANALYSIS_PROMPT + '\n\nIMPORTANT: Return ONLY raw JSON without any markdown formatting or code blocks.',
+                },
+              ],
+            },
+          ],
+        }),
       });
 
-      const retryTextContent = retryResponse.content.find((c) => c.type === 'text');
-      if (!retryTextContent || retryTextContent.type !== 'text') {
+      if (!retryResponse.ok) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Analysis failed. Please try again.',
+          type: 'parse_error',
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const retryData = await retryResponse.json() as {
+        content: Array<{ type: string; text?: string }>;
+      };
+      const retryTextContent = retryData.content.find((c) => c.type === 'text');
+
+      if (!retryTextContent || !retryTextContent.text) {
         return new Response(JSON.stringify({
           success: false,
           error: 'Analysis failed. Please try again.',
@@ -228,4 +263,4 @@ export default async function handler(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-}
+};
