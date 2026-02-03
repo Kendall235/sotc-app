@@ -13,6 +13,7 @@ export const WatchSchema = z.object({
   notable_features: z.array(z.string()),
   confidence: ConfidenceSchema,
   position: z.string(),
+  image_url: z.string().url().nullable().optional(),
 });
 
 export const CollectionAnalysisSchema = z.object({

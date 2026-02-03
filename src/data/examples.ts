@@ -11,6 +11,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['200M Water Resistant', 'EL Backlight'],
       confidence: 'high',
       position: 'top left',
+      image_url: null,
     },
     {
       model_number: 'GA-2100-1A1',
@@ -20,6 +21,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['Carbon Core Guard', 'Thin Profile'],
       confidence: 'high',
       position: 'top center',
+      image_url: null,
     },
     {
       model_number: 'GW-M5610U-1',
@@ -29,6 +31,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['Solar', 'Multi-Band 6', 'STN LCD'],
       confidence: 'high',
       position: 'top right',
+      image_url: null,
     },
     {
       model_number: 'GWF-A1000-1A',
@@ -38,6 +41,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['Solar', 'Bluetooth', 'ISO Diver'],
       confidence: 'high',
       position: 'middle left',
+      image_url: null,
     },
     {
       model_number: 'GW-9400-1',
@@ -47,6 +51,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['Solar', 'Triple Sensor', 'Multi-Band 6'],
       confidence: 'high',
       position: 'middle center',
+      image_url: null,
     },
     {
       model_number: 'GMW-B5000D-1',
@@ -56,6 +61,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['Solar', 'Bluetooth', 'Full Stainless Steel'],
       confidence: 'medium',
       position: 'middle right',
+      image_url: null,
     },
     {
       model_number: 'DW-6900-1V',
@@ -65,6 +71,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['EL Backlight', '3 Alarms'],
       confidence: 'high',
       position: 'bottom left',
+      image_url: null,
     },
     {
       model_number: 'GA-110-1A',
@@ -74,6 +81,7 @@ export const exampleCollection: CollectionAnalysis = {
       notable_features: ['World Time', 'Magnetic Resistant'],
       confidence: 'medium',
       position: 'bottom right',
+      image_url: null,
     },
   ],
   collection_highlights: [

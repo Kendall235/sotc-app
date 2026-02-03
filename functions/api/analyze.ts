@@ -1,3 +1,5 @@
+import { injectWatchImages } from './watch-images';
+
 interface Env {
   ANTHROPIC_API_KEY: string;
 }
@@ -239,6 +241,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+    }
+
+    // Inject watch images from curated database
+    if (analysisData.watches && Array.isArray(analysisData.watches)) {
+      injectWatchImages(analysisData.watches);
     }
 
     return new Response(JSON.stringify({
