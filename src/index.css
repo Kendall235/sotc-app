@@ -30,6 +30,11 @@
   --color-lcd-dim: rgba(184, 196, 160, 0.10);
   --color-lcd-segment: #3A3E32;
 
+  /* DNA Bar Colors */
+  --color-dna-warm-brown: #5A4B3F;
+  --color-dna-olive: #3A3E32;
+  --color-dna-blue-gray: #2A3545;
+
   /* Text Hierarchy */
   --color-text-primary: #E8E4DE;
   --color-text-secondary: #A8A49E;
@@ -505,4 +510,47 @@ body {
 .btn-ghost:hover {
   border-color: var(--color-text-secondary);
   color: var(--color-text-primary);
+}
+
+/* Model Chip Styles */
+.chip-standard {
+  background: rgba(255, 255, 255, 0.07);
+  color: #B0ACA6;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chip-rare {
+  background: rgba(212, 165, 52, 0.12);
+  color: #D4A534;
+  border: 1px solid rgba(212, 165, 52, 0.25);
+}
+
+.chip-premium {
+  background: rgba(196, 52, 46, 0.12);
+  color: #C4342E;
+  border: 1px solid rgba(196, 52, 46, 0.25);
+}
+
+/* Photo Hero */
+.photo-hero {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-bottom: 2px solid var(--color-brick);
+}
+
+/* Updated DNA segment colors */
+.dna-segment.warm-brown {
+  background: var(--color-dna-warm-brown);
+  color: var(--color-text-primary);
+}
+
+.dna-segment.olive {
+  background: var(--color-dna-olive);
+  color: var(--color-text-secondary);
+}
+
+.dna-segment.blue-gray {
+  background: var(--color-dna-blue-gray);
+  color: var(--color-text-secondary);
 }

@@ -1,34 +1,62 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState, useMemo } from 'react';
 import type { CollectionAnalysis } from '../types/collection';
-import { WatchGrid } from './WatchGrid';
-import { StatsBar } from './StatsBar';
+import { PhotoHero } from './PhotoHero';
+import { EditableTitle } from './EditableTitle';
+import { ModelChipsList } from './ModelChipsList';
+import { StatsRow } from './StatsRow';
 import { deriveCollectorDNA, getDNAFlexValues } from '../utils/collectorDNA';
+import { addTiersToWatches, countByTier } from '../utils/watchTiers';
+import { calculateScore } from '../utils/scoreCalculation';
 
 interface CollectionCardProps {
   analysis: CollectionAnalysis;
-  imageUrl: string | null;
+  photoUrl: string | null;
 }
 
 export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
-  function CollectionCard({ analysis, imageUrl }, ref) {
-    const dna = deriveCollectorDNA(analysis.watches);
-    const flexValues = getDNAFlexValues(dna);
+  function CollectionCard({ analysis, photoUrl }, ref) {
+    const [cardTitle, setCardTitle] = useState('G-SHOCK COLLECTION');
+
+    // Memoize computed values to prevent recomputation on every render
+    const watchesWithTiers = useMemo(
+      () => addTiersToWatches(analysis.watches),
+      [analysis.watches]
+    );
+
+    const tierCounts = useMemo(
+      () => countByTier(watchesWithTiers),
+      [watchesWithTiers]
+    );
+
+    const dna = useMemo(
+      () => deriveCollectorDNA(analysis.watches),
+      [analysis.watches]
+    );
+
+    const flexValues = useMemo(
+      () => getDNAFlexValues(dna),
+      [dna]
+    );
+
+    const score = useMemo(
+      () => calculateScore(analysis),
+      [analysis]
+    );
+
+    const seriesCount = Object.keys(analysis.series_breakdown).length;
+    const rareCount = tierCounts.rare + tierCounts.premium;
 
     return (
       <div
         ref={ref}
         className="overflow-hidden rounded-2xl bg-resin-dark border border-[var(--color-border)]"
+        style={{ width: '480px', maxWidth: '100%' }}
       >
-        {/* Brick red top bezel accent */}
-        <div className="bezel-top" />
-
         {/* Header */}
-        <div className="px-7 pt-6 pb-0">
+        <div className="px-7 pt-6 pb-4">
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="font-display text-[26px] uppercase tracking-wide text-primary leading-none">
-                G-Shock Collection
-              </h2>
+            <div className="flex-1 min-w-0 pr-4">
+              <EditableTitle value={cardTitle} onChange={setCardTitle} />
               <p className="mt-1 font-mono text-[11px] text-secondary tracking-wider uppercase">
                 {new Date().toLocaleDateString('en-US', {
                   month: 'short',
@@ -36,7 +64,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
                 }).toUpperCase()} · SOTC
               </p>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className="font-display text-5xl text-brick leading-none">
                 {analysis.total_watches}
               </div>
@@ -47,25 +75,22 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
           </div>
         </div>
 
-        {/* Original image thumbnail (optional) */}
-        {imageUrl && (
-          <div className="border-b border-[var(--color-border)] p-4 mx-7 mt-4">
-            <img
-              src={imageUrl}
-              alt="Original collection"
-              className="h-32 w-full rounded-lg object-cover opacity-60"
-            />
-          </div>
-        )}
+        {/* Photo Hero */}
+        <PhotoHero imageUrl={photoUrl} />
 
-        {/* Watch grid */}
+        {/* Model Chips */}
         <div className="px-7 pt-5 pb-4">
-          <WatchGrid watches={analysis.watches} />
+          <ModelChipsList watches={watchesWithTiers} />
         </div>
 
-        {/* Stats */}
+        {/* Stats Row */}
         <div className="px-7 pb-4">
-          <StatsBar analysis={analysis} />
+          <StatsRow
+            pieces={analysis.total_watches}
+            series={seriesCount}
+            rare={rareCount}
+            score={score}
+          />
         </div>
 
         {/* Collector DNA bar */}

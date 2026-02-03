@@ -1,6 +1,6 @@
 import type { Watch } from '../types/collection';
 
-export type ArchetypeColor = 'brick' | 'gold' | 'tertiary' | 'quaternary';
+export type ArchetypeColor = 'brick' | 'warm-brown' | 'olive' | 'blue-gray';
 
 export interface Archetype {
   name: string;
@@ -79,7 +79,7 @@ export function deriveCollectorDNA(watches: Watch[]): Archetype[] {
   const total = watches.length;
 
   // Assign colors based on rank
-  const colors: ArchetypeColor[] = ['brick', 'gold', 'tertiary', 'quaternary'];
+  const colors: ArchetypeColor[] = ['brick', 'warm-brown', 'olive', 'blue-gray'];
 
   // Return top 4 archetypes with percentages
   return sortedArchetypes.slice(0, 4).map(([name, count], index) => ({

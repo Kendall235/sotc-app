@@ -6,7 +6,7 @@ import { UploadZone } from './components/UploadZone';
 import { ProcessingState } from './components/ProcessingState';
 import { ErrorState } from './components/ErrorState';
 import { CollectionCard } from './components/CollectionCard';
-import { DownloadButton } from './components/DownloadButton';
+import { ShareButtons } from './components/ShareButtons';
 import { ExampleCards } from './components/ExampleCards';
 import { processImage, createPreviewUrl } from './utils/imageProcessing';
 import { analyzeCollection, ApiError } from './services/api';
@@ -152,12 +152,12 @@ function App() {
             <CollectionCard
               ref={cardRef}
               analysis={analysis}
-              imageUrl={null}
+              photoUrl={previewUrl}
             />
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <DownloadButton targetRef={cardRef} />
+            <ShareButtons cardRef={cardRef} />
+            <div className="flex justify-center">
               <button
                 onClick={handleNewUpload}
                 className="btn-ghost"
