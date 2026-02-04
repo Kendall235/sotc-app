@@ -25,6 +25,22 @@ function parsePosition(position: string): number {
   return row * 10 + col;
 }
 
+// Derive columns from common watch case layouts
+function getColumnsFromCount(count: number): number {
+  if (count <= 3) return count;      // 1×3 or less
+  if (count === 4) return 2;         // 2×2
+  if (count === 5) return 5;         // 1×5 (single row)
+  if (count === 6) return 3;         // 2×3
+  if (count <= 8) return 4;          // 2×4
+  if (count === 9) return 3;         // 3×3
+  if (count === 10) return 5;        // 2×5
+  if (count === 12) return 4;        // 3×4
+  if (count <= 15) return 5;         // 3×5
+  if (count <= 18) return 6;         // 3×6 (standard large case)
+  if (count <= 24) return 6;         // 4×6
+  return 6;                          // 6 columns max for readability
+}
+
 export function ModelChipsList({ watches }: ModelChipsListProps) {
   // Sort watches by position (top-left to bottom-right) using useMemo
   const sortedWatches = useMemo(() => {
@@ -42,10 +58,15 @@ export function ModelChipsList({ watches }: ModelChipsListProps) {
   const hasRare = watches.some(w => w.tier === 'rare');
   const hasPremium = watches.some(w => w.tier === 'premium');
 
+  const columns = getColumnsFromCount(watches.length);
+
   return (
     <div>
       {/* Chips grid */}
-      <div className="flex flex-wrap gap-1.5">
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+      >
         {sortedWatches.map((watch, index) => (
           <ModelChip
             key={`${watch.model_number}-${index}`}

@@ -8,10 +8,14 @@ export function PhotoHero({ imageUrl }: PhotoHeroProps) {
   }
 
   return (
-    <img
-      src={imageUrl}
-      alt="Collection photo"
-      className="photo-hero"
-    />
+    <div className="px-7 py-4">
+      <div className="rounded-lg overflow-hidden border border-[var(--color-border)]">
+        <img
+          src={imageUrl}
+          alt="Collection photo"
+          className="w-full max-h-[320px] object-cover"
+        />
+      </div>
+    </div>
   );
 }
