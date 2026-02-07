@@ -7,6 +7,7 @@ import { UploadZoneV1 } from './components/UploadZoneV1';
 import { UploadZoneV2 } from './components/UploadZoneV2';
 import { UploadZoneV3 } from './components/UploadZoneV3';
 import { ProcessingState } from './components/ProcessingState';
+import { ScanningOverlay } from './components/ScanningOverlay';
 import { ErrorState } from './components/ErrorState';
 import { CollectionCard } from './components/CollectionCard';
 import { ShareButtons } from './components/ShareButtons';
@@ -166,10 +167,14 @@ function App() {
 
         {/* Uploading/Processing state */}
         {(state === 'uploading' || state === 'processing') && (
-          <div className="space-y-6 max-w-lg mx-auto">
-            {renderUploadZone(true, previewUrl)}
-            {state === 'processing' && !previewUrl && <ProcessingState />}
-          </div>
+          previewUrl ? (
+            <ScanningOverlay previewUrl={previewUrl} />
+          ) : (
+            <div className="space-y-6 max-w-lg mx-auto">
+              {renderUploadZone(true, null)}
+              {state === 'processing' && <ProcessingState />}
+            </div>
+          )
         )}
 
         {/* Error state */}
@@ -194,10 +199,10 @@ function App() {
 
         {/* Result state */}
         {state === 'result' && analysis && (
-          <div className="space-y-6">
+          <div className="flex flex-col items-center space-y-6">
             {/* Low confidence warning */}
             {analysis.watches.some(w => w.confidence === 'low') && (
-              <div className="flex items-center gap-2 rounded-xl bg-gold/10 border border-[var(--color-gold-border)] px-4 py-3 text-sm text-gold">
+              <div className="flex items-center gap-2 rounded-xl bg-gold/10 border border-[var(--color-gold-border)] px-4 py-3 text-sm text-gold w-full max-w-[600px]">
                 <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -214,14 +219,12 @@ function App() {
 
             {/* Actions */}
             <ShareButtons cardRef={cardRef} />
-            <div className="flex justify-center">
-              <button
-                onClick={handleNewUpload}
-                className="btn-ghost"
-              >
-                Upload New Photo
-              </button>
-            </div>
+            <button
+              onClick={handleNewUpload}
+              className="btn-ghost"
+            >
+              Upload New Photo
+            </button>
           </div>
         )}
       </main>
