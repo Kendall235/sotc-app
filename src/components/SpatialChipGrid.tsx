@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { EditableChip } from './EditableChip';
 import type { WatchWithTier } from '../utils/watchTiers';
+import { getMaxCharsForGrid } from '../utils/abbreviateModel';
 
 interface SpatialChipGridProps {
   watches: WatchWithTier[];
@@ -119,6 +120,9 @@ export function SpatialChipGrid({
   // Determine if we need smaller chips for large collections
   const isLargeCollection = watches.length > 12;
 
+  // Calculate max chars based on grid columns for smart abbreviation
+  const maxChars = getMaxCharsForGrid(gridCols);
+
   if (watches.length === 0) {
     return null;
   }
@@ -147,6 +151,7 @@ export function SpatialChipGrid({
                 gridColumn: watch.col,
                 gridRow: watch.row,
                 minWidth: 0, // Allow shrinking in grid
+                overflow: 'hidden',
               }}
             >
               <EditableChip
@@ -154,6 +159,7 @@ export function SpatialChipGrid({
                 originalValue={watch.model_number}
                 tier={watch.tier}
                 onChange={(newValue) => onModelEdit(watch.originalIndex, newValue)}
+                maxChars={maxChars}
               />
             </div>
           );

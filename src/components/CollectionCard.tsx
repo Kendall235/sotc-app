@@ -58,7 +58,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
     return (
       <div
         ref={ref}
-        className="overflow-hidden"
+        className="collection-card overflow-hidden"
         style={{
           width: '600px',
           maxWidth: '100%',

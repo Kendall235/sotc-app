@@ -1,13 +1,19 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Layout } from './components/Layout';
 import { Hero } from './components/Hero';
 import { Footer } from './components/Footer';
 import { UploadZone } from './components/UploadZone';
+import { UploadZoneV1 } from './components/UploadZoneV1';
+import { UploadZoneV2 } from './components/UploadZoneV2';
+import { UploadZoneV3 } from './components/UploadZoneV3';
 import { ProcessingState } from './components/ProcessingState';
 import { ErrorState } from './components/ErrorState';
 import { CollectionCard } from './components/CollectionCard';
 import { ShareButtons } from './components/ShareButtons';
 import { ExampleCards } from './components/ExampleCards';
+import { LandingV1 } from './pages/LandingV1';
+import { LandingV2 } from './pages/LandingV2';
+import { LandingV3 } from './pages/LandingV3';
 import { processImage, createPreviewUrl } from './utils/imageProcessing';
 import { analyzeCollection, ApiError } from './services/api';
 import type { AppState, AppError, CollectionAnalysis } from './types/collection';
@@ -21,6 +27,12 @@ function App() {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const lastFile = useRef<File | null>(null);
+
+  // Get variant from URL query param (?v=1, ?v=2, ?v=3)
+  const variant = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('v');
+  }, []);
 
   const handleFileSelect = useCallback(async (file: File) => {
     lastFile.current = file;
@@ -86,31 +98,76 @@ function App() {
     handleReset();
   }, [handleReset]);
 
+  // Render the appropriate upload zone based on variant
+  const renderUploadZone = (isProcessing: boolean, preview: string | null) => {
+    switch (variant) {
+      case '1':
+        return (
+          <UploadZoneV1
+            onFileSelect={handleFileSelect}
+            isProcessing={isProcessing}
+            previewUrl={preview}
+          />
+        );
+      case '2':
+        return (
+          <UploadZoneV2
+            onFileSelect={handleFileSelect}
+            isProcessing={isProcessing}
+            previewUrl={preview}
+          />
+        );
+      case '3':
+        return (
+          <UploadZoneV3
+            onFileSelect={handleFileSelect}
+            isProcessing={isProcessing}
+            previewUrl={preview}
+          />
+        );
+      default:
+        return (
+          <UploadZone
+            onFileSelect={handleFileSelect}
+            isProcessing={isProcessing}
+            previewUrl={preview}
+          />
+        );
+    }
+  };
+
   return (
     <Layout>
-      <Hero />
+      {/* Only show original Hero for v=0 (original landing) */}
+      {variant === '0' && <Hero />}
 
-      <main className="mx-auto max-w-3xl">
-        {/* Idle state - show upload zone and examples */}
+      <main className={`mx-auto ${variant === '0' ? 'max-w-3xl' : 'max-w-5xl'}`}>
+        {/* Idle state - show landing page variant or default */}
         {state === 'idle' && (
-          <>
-            <UploadZone
-              onFileSelect={handleFileSelect}
-              isProcessing={false}
-              previewUrl={null}
-            />
-            <ExampleCards />
-          </>
+          variant === '1' ? (
+            <LandingV1 onFileSelect={handleFileSelect} />
+          ) : variant === '3' ? (
+            <LandingV3 onFileSelect={handleFileSelect} />
+          ) : variant === '0' ? (
+            // Original landing (now accessed via ?v=0)
+            <>
+              <UploadZone
+                onFileSelect={handleFileSelect}
+                isProcessing={false}
+                previewUrl={null}
+              />
+              <ExampleCards />
+            </>
+          ) : (
+            // Default: V2 landing
+            <LandingV2 onFileSelect={handleFileSelect} />
+          )
         )}
 
         {/* Uploading/Processing state */}
         {(state === 'uploading' || state === 'processing') && (
-          <div className="space-y-6">
-            <UploadZone
-              onFileSelect={handleFileSelect}
-              isProcessing={true}
-              previewUrl={previewUrl}
-            />
+          <div className="space-y-6 max-w-lg mx-auto">
+            {renderUploadZone(true, previewUrl)}
             {state === 'processing' && !previewUrl && <ProcessingState />}
           </div>
         )}

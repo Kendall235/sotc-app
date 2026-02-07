@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import type { WatchTier } from '../utils/watchTiers';
+import { abbreviateModel } from '../utils/abbreviateModel';
 
 interface EditableChipProps {
   value: string;
   originalValue: string;
   tier: WatchTier;
   onChange: (newValue: string) => void;
+  maxChars?: number; // Max characters before abbreviation kicks in
 }
 
 /**
@@ -42,7 +44,7 @@ function getTierStyles(tier: WatchTier) {
  * EditableChip - Click-to-edit chip component
  * Following EditableTitle.tsx pattern for inline editing
  */
-export function EditableChip({ value, originalValue, tier, onChange }: EditableChipProps) {
+export function EditableChip({ value, originalValue, tier, onChange, maxChars = 18 }: EditableChipProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -139,8 +141,9 @@ export function EditableChip({ value, originalValue, tier, onChange }: EditableC
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease',
         whiteSpace: 'nowrap',
+        overflow: 'hidden',
       }}
-      title="Click to edit"
+      title={value}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'scale(1.02)';
       }}
@@ -149,6 +152,7 @@ export function EditableChip({ value, originalValue, tier, onChange }: EditableC
       }}
     >
       <span
+        className="editable-chip-text"
         style={{
           fontFamily: 'var(--font-roboto-mono)',
           fontSize: '11px',
@@ -156,9 +160,12 @@ export function EditableChip({ value, originalValue, tier, onChange }: EditableC
           lineHeight: '1',
           color: styles.textColor,
           letterSpacing: '0.02em',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'block',
         }}
       >
-        {value}
+        {abbreviateModel(value, maxChars)}
         {isEdited && (
           <span
             style={{
