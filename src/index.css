@@ -1,5 +1,5 @@
-/* Google Fonts - Heritage Palette */
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+/* Google Fonts - Heritage Palette + New Card Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
@@ -60,6 +60,25 @@
   --font-mono: "Fira Code", monospace;
   --font-body: "Plus Jakarta Sans", sans-serif;
   --font-logo: "Chakra Petch", sans-serif;
+  --font-oswald: "Oswald", sans-serif;
+  --font-roboto-mono: "Roboto Mono", monospace;
+
+  /* Warm Charcoal Backgrounds (New Card Palette) */
+  --color-bg-deep: #121110;
+  --color-bg-card: #1A1917;
+  --color-bg-surface: #232220;
+  --color-bg-elevated: #2C2A27;
+
+  /* G-Shock Accent Colors */
+  --color-gshock-red: #D42B1E;
+  --color-gshock-gold: #C9A227;
+
+  /* New Text Colors */
+  --color-text-bright: #F8F6F1;
+
+  /* New Border Colors */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-medium: rgba(255, 255, 255, 0.12);
 }
 
 /* Base styles */
@@ -108,6 +127,25 @@ body {
 .font-mono { font-family: var(--font-mono); }
 .font-body { font-family: var(--font-body); }
 .font-logo { font-family: var(--font-logo); }
+.font-oswald { font-family: var(--font-oswald); }
+.font-roboto-mono { font-family: var(--font-roboto-mono); }
+
+/* Warm charcoal background utilities */
+.bg-deep { background-color: var(--color-bg-deep); }
+.bg-card-new { background-color: var(--color-bg-card); }
+.bg-surface-new { background-color: var(--color-bg-surface); }
+.bg-elevated-new { background-color: var(--color-bg-elevated); }
+
+/* G-Shock accent colors */
+.text-gshock-red { color: var(--color-gshock-red); }
+.text-gshock-gold { color: var(--color-gshock-gold); }
+.bg-gshock-red { background-color: var(--color-gshock-red); }
+.bg-gshock-gold { background-color: var(--color-gshock-gold); }
+.border-gshock-red { border-color: var(--color-gshock-red); }
+.border-gshock-gold { border-color: var(--color-gshock-gold); }
+
+/* New text utilities */
+.text-bright { color: var(--color-text-bright); }
 
 /* Scanning animation - horizontal sweep */
 @keyframes scan-horizontal {

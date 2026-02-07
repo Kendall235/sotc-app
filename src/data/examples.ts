@@ -98,4 +98,6 @@ export const exampleCollection: CollectionAnalysis = {
     '6900': 1,
     'GA-110': 1,
   },
+  grid_rows: 3,
+  grid_cols: 3,
 };

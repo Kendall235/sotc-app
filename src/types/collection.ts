@@ -21,6 +21,8 @@ export const CollectionAnalysisSchema = z.object({
   watches: z.array(WatchSchema),
   collection_highlights: z.array(z.string()),
   series_breakdown: z.record(z.string(), z.number()),
+  grid_rows: z.number().int().min(1),
+  grid_cols: z.number().int().min(1),
 });
 
 // TypeScript types derived from Zod schemas

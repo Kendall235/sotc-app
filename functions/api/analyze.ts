@@ -28,21 +28,34 @@ function checkRateLimit(ip: string): boolean {
 
 const ANALYSIS_PROMPT = `You are a G-Shock watch identification expert. Analyze this collection photo and identify each visible G-Shock watch.
 
+CRITICAL REQUIREMENTS:
+1. Each watch MUST have a UNIQUE model_number - NO DUPLICATES unless truly identical watches.
+2. Examine distinguishing features carefully: case material (resin vs full-metal), bezel color, dial color, band type, size, and special edition markings.
+3. Look for these common series indicators:
+   - GMW-B5000: Full-metal square cases (silver, gold, black IP, titanium)
+   - DW-5600: Standard resin squares
+   - GW-5000: Screw-back premium squares
+   - GA-2100: CasiOak octagonal bezels
+   - DW-6900: Round face with triple graph
+   - Special editions: NASA, Supreme, BAPE, Porter collaborations have unique markings
+
 For each watch, provide:
-- model_number: The specific model (e.g., "DW-5600E-1V", "GA-2100-1A1")
-- series: The product line (e.g., "Square/5600", "CasiOak/2100", "Frogman", "Mudmaster")
+- model_number: The SPECIFIC model (e.g., "GMW-B5000D-1" for steel, "GMW-B5000-1" for black IP, "DW-5600NASA21-7" for NASA collab). Be precise - different colors/materials = different models.
+- series: The product line (e.g., "Square/5600", "Full Metal", "CasiOak/2100", "Frogman", "Mudmaster")
 - display_type: "Digital", "Analog", or "Ana-Digi"
-- colorway: Brief description (e.g., "Stealth Black", "Red/Black")
-- notable_features: Array of features (e.g., ["Solar", "Bluetooth", "Tide Graph"])
+- colorway: Brief description (e.g., "Silver Steel", "Stealth Black", "NASA White")
+- notable_features: Array of features (e.g., ["Solar", "Bluetooth", "Full Metal", "Limited Edition"])
 - confidence: "high", "medium", or "low" based on image clarity
-- position: Where in the image (e.g., "top left", "center row, 3rd from left")
+- position: MUST use format "row-N-pos-M" where N is row number from top (1=first row) and M is position from left (1=leftmost). Example: "row-2-pos-4" for second row, fourth watch from left.
 
 Also provide:
 - total_watches: Integer count
 - collection_highlights: 2-3 notable observations about the collection
 - series_breakdown: Object with series names as keys and counts as values
+- grid_rows: Total number of rows of watches in the photo (integer)
+- grid_cols: Maximum number of watches in any single row (integer)
 
-Return ONLY valid JSON. If you cannot identify a watch clearly, include it with confidence: "low".`;
+Return ONLY valid JSON. If you cannot identify a watch clearly, include it with confidence: "low" but still provide your best guess for the model.`;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;

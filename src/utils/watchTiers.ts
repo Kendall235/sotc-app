@@ -16,22 +16,23 @@ const PREMIUM_PATTERNS = [
   /full\s*metal/i,
 ];
 
-// Rare patterns: Limited editions, collaborations, special editions
+// Rare patterns: Specific collaboration names only
+// Avoid generic patterns that cause false positives (e.g., GX-56BB as rare)
 const RARE_PATTERNS = [
-  /nasa/i,
-  /bape/i,
-  /kith/i,
-  /bamford/i,
-  /limited/i,
-  /collab/i,
-  /anniversary/i,
-  /special/i,
-  /x\s+\w+/i,       // Collaborations like "x BAPE"
-  /35th/i,
-  /40th/i,
-  /one\s*piece/i,
-  /dragon\s*ball/i,
-  /transformers/i,
+  /nasa/i,          // NASA collaboration
+  /bape/i,          // BAPE collaboration
+  /kith/i,          // KITH collaboration
+  /bamford/i,       // Bamford collaboration
+  /porter/i,        // Porter collaboration
+  /stussy/i,        // Stussy collaboration
+  /supreme/i,       // Supreme collaboration
+  /one\s*piece/i,   // One Piece collaboration
+  /dragon\s*ball/i, // Dragon Ball collaboration
+  /transformers/i,  // Transformers collaboration
+  /mastermind/i,    // Mastermind Japan
+  /fragment/i,      // Fragment Design
+  /john\s*mayer/i,  // John Mayer collaboration
+  /hodinkee/i,      // Hodinkee collaboration
 ];
 
 /**
@@ -81,4 +82,39 @@ export function countByTier(watches: WatchWithTier[]): Record<WatchTier, number>
     },
     { standard: 0, rare: 0, premium: 0 }
   );
+}
+
+export type WatchShape = 'square' | 'round';
+
+// Round patterns - models with round/octagon faces
+const ROUND_PATTERNS = [
+  /ga-2100/i,    // CasiOak (octagon)
+  /gm-2100/i,    // CasiOak metal
+  /gm-b2100/i,   // CasiOak metal Bluetooth
+  /gst-/i,       // G-STEEL
+  /mtg-/i,       // MT-G
+  /mrg-/i,       // MR-G
+  /awg-/i,       // Ana-Digi wave
+  /gsw-/i,       // G-SQUAD
+  /ga-/i,        // Ana-Digi (various round)
+  /gba-/i,       // G-SQUAD analog
+  /gbd-/i,       // G-SQUAD digital (some round)
+  /gwf-/i,       // Frogman (round)
+  /gw-9400/i,    // Rangeman (round)
+];
+
+/**
+ * Classify watch shape for icon display
+ * Most G-Shocks are square by default, only specific models are round
+ */
+export function classifyShape(model: string): WatchShape {
+  const modelLower = model.toLowerCase();
+
+  for (const pattern of ROUND_PATTERNS) {
+    if (pattern.test(modelLower)) {
+      return 'round';
+    }
+  }
+
+  return 'square';
 }

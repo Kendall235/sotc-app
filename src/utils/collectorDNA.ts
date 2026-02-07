@@ -32,7 +32,8 @@ const ARCHETYPE_MAPPING: Record<string, string[]> = {
     '6900', 'DW-6900', 'GD-350', 'GD-X6900', 'GDX-6900'
   ],
   'Limited Edition': [
-    'Collaboration', 'Limited', 'Anniversary', 'Special', 'Collab'
+    'Collaboration', 'Limited', 'Anniversary', 'Special', 'Collab',
+    'NASA', 'BAPE', 'KITH', 'Bamford', 'One Piece', 'Dragon Ball'
   ],
 };
 
@@ -78,14 +79,23 @@ export function deriveCollectorDNA(watches: Watch[]): Archetype[] {
   // Calculate total for percentages
   const total = watches.length;
 
-  // Assign colors based on rank
-  const colors: ArchetypeColor[] = ['brick', 'warm-brown', 'olive', 'blue-gray'];
+  // Assign colors based on archetype category (semantic)
+  const categoryColors: Record<string, ArchetypeColor> = {
+    'Square Purist': 'brick',      // Red - iconic G-Shock
+    'Limited Edition': 'warm-brown', // Gold - collabs/rare
+    'Tool Watch': 'olive',          // Military green
+    'CasiOak Fan': 'blue-gray',     // Modern slate
+    'Premium': 'warm-brown',        // Gold - premium
+    'Ana-Digi': 'olive',            // Green-gray
+    'Classic Digital': 'blue-gray', // Classic slate
+    'Collector': 'olive',           // Default
+  };
 
   // Return top 4 archetypes with percentages
-  return sortedArchetypes.slice(0, 4).map(([name, count], index) => ({
+  return sortedArchetypes.slice(0, 4).map(([name, count]) => ({
     name: shortenArchetypeName(name),
     percentage: Math.round((count / total) * 100),
-    color: colors[index] || 'quaternary',
+    color: categoryColors[name] || 'olive',
   }));
 }
 

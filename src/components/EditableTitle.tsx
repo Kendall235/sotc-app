@@ -8,6 +8,7 @@ interface EditableTitleProps {
 
 export function EditableTitle({ value, onChange, maxLength = 30 }: EditableTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -56,8 +57,8 @@ export function EditableTitle({ value, onChange, maxLength = 30 }: EditableTitle
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         maxLength={maxLength}
-        className="font-display text-[26px] uppercase tracking-wide text-primary leading-none bg-transparent border-b border-brick outline-none w-full"
-        style={{ caretColor: 'var(--color-brick)' }}
+        className="font-oswald text-[20px] font-semibold uppercase tracking-wide text-bright leading-none bg-transparent border-b outline-none w-full"
+        style={{ caretColor: 'var(--color-gshock-red)', borderColor: 'var(--color-gshock-red)' }}
       />
     );
   }
@@ -65,7 +66,15 @@ export function EditableTitle({ value, onChange, maxLength = 30 }: EditableTitle
   return (
     <h2
       onClick={handleClick}
-      className="font-display text-[26px] uppercase tracking-wide text-primary leading-none cursor-pointer hover:text-brick transition-colors"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="font-oswald text-[20px] font-semibold uppercase tracking-wide leading-none cursor-pointer transition-all"
+      style={{
+        color: isHovered ? 'var(--color-gshock-red)' : 'var(--color-text-bright)',
+        textDecoration: isHovered ? 'underline' : 'none',
+        textDecorationColor: 'var(--color-gshock-red)',
+        textUnderlineOffset: '3px',
+      }}
       title="Click to edit"
     >
       {value}

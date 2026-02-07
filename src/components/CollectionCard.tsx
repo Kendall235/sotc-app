@@ -1,12 +1,12 @@
-import { forwardRef, useState, useMemo } from 'react';
+import { forwardRef, useState, useMemo, useCallback } from 'react';
 import type { CollectionAnalysis } from '../types/collection';
-import { PhotoHero } from './PhotoHero';
+import { PhotoFrame } from './PhotoFrame';
+import { SpatialChipGrid } from './SpatialChipGrid';
 import { EditableTitle } from './EditableTitle';
-import { ModelChipsList } from './ModelChipsList';
-import { StatsRow } from './StatsRow';
-import { deriveCollectorDNA, getDNAFlexValues } from '../utils/collectorDNA';
+import { StatsBar } from './StatsBar';
+import { DNABar } from './DNABar';
+import { deriveCollectorDNA } from '../utils/collectorDNA';
 import { addTiersToWatches, countByTier } from '../utils/watchTiers';
-import { calculateScore } from '../utils/scoreCalculation';
 
 interface CollectionCardProps {
   analysis: CollectionAnalysis;
@@ -16,8 +16,14 @@ interface CollectionCardProps {
 export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
   function CollectionCard({ analysis, photoUrl }, ref) {
     const [cardTitle, setCardTitle] = useState('G-SHOCK COLLECTION');
+    const [editedModels, setEditedModels] = useState<Map<number, string>>(new Map());
 
-    // Memoize computed values to prevent recomputation on every render
+    // Handler for model edits
+    const handleModelEdit = useCallback((index: number, newValue: string) => {
+      setEditedModels((prev) => new Map(prev).set(index, newValue));
+    }, []);
+
+    // Memoize computed values
     const watchesWithTiers = useMemo(
       () => addTiersToWatches(analysis.watches),
       [analysis.watches]
@@ -33,98 +39,103 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
       [analysis.watches]
     );
 
-    const flexValues = useMemo(
-      () => getDNAFlexValues(dna),
-      [dna]
-    );
-
-    const score = useMemo(
-      () => calculateScore(analysis),
-      [analysis]
-    );
-
+    // Count unique series
     const seriesCount = Object.keys(analysis.series_breakdown).length;
-    const rareCount = tierCounts.rare + tierCounts.premium;
+
+    // Count collaborations (rare tier is used for collabs)
+    const collabCount = tierCounts.rare;
+
+    // Count premium pieces
+    const premiumCount = tierCounts.premium;
+
+    const date = new Date()
+      .toLocaleDateString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      })
+      .toUpperCase();
 
     return (
       <div
         ref={ref}
-        className="overflow-hidden rounded-2xl bg-resin-dark border border-[var(--color-border)]"
-        style={{ width: '480px', maxWidth: '100%' }}
+        className="overflow-hidden"
+        style={{
+          width: '600px',
+          maxWidth: '100%',
+          backgroundColor: 'var(--color-bg-card)',
+          borderRadius: '4px',
+          borderTop: '3px solid var(--color-gshock-red)',
+        }}
       >
         {/* Header */}
-        <div className="px-7 pt-6 pb-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0 pr-4">
-              <EditableTitle value={cardTitle} onChange={setCardTitle} />
-              <p className="mt-1 font-mono text-[11px] text-secondary tracking-wider uppercase">
-                {new Date().toLocaleDateString('en-US', {
-                  month: 'short',
-                  year: 'numeric',
-                }).toUpperCase()} · SOTC
-              </p>
+        <div
+          className="px-5 pt-4 pb-3 flex justify-between items-start"
+          style={{ backgroundColor: 'var(--color-bg-surface)' }}
+        >
+          <div className="flex-1 min-w-0 pr-4">
+            <EditableTitle value={cardTitle} onChange={setCardTitle} />
+            <p className="font-roboto-mono text-[10px] text-muted tracking-wider uppercase mt-1">
+              {date} · SOTC
+            </p>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div
+              className="font-oswald text-[42px] font-semibold leading-none"
+              style={{ color: 'var(--color-gshock-red)' }}
+            >
+              {analysis.total_watches}
             </div>
-            <div className="text-right flex-shrink-0">
-              <div className="font-display text-5xl text-brick leading-none">
-                {analysis.total_watches}
-              </div>
-              <div className="font-mono text-[11px] text-secondary tracking-wider uppercase">
-                pieces
-              </div>
+            <div className="font-roboto-mono text-[10px] text-muted tracking-wider uppercase">
+              pieces
             </div>
           </div>
         </div>
 
-        {/* Photo Hero */}
-        <PhotoHero imageUrl={photoUrl} />
+        {/* Hero Photo Frame - clean, no overlays */}
+        <PhotoFrame imageUrl={photoUrl} />
 
-        {/* Model Chips */}
-        <div className="px-7 pt-5 pb-4">
-          <ModelChipsList watches={watchesWithTiers} />
-        </div>
+        {/* Spatial Chip Grid - model numbers below photo */}
+        <SpatialChipGrid
+          watches={watchesWithTiers}
+          gridRows={analysis.grid_rows}
+          gridCols={analysis.grid_cols}
+          editedModels={editedModels}
+          onModelEdit={handleModelEdit}
+        />
 
-        {/* Stats Row */}
-        <div className="px-7 pb-4">
-          <StatsRow
-            pieces={analysis.total_watches}
-            series={seriesCount}
-            rare={rareCount}
-            score={score}
-          />
-        </div>
+        {/* Stats Bar */}
+        <StatsBar
+          pieces={analysis.total_watches}
+          series={seriesCount}
+          collab={collabCount}
+          premium={premiumCount}
+        />
 
-        {/* Collector DNA bar */}
+        {/* DNA Bar */}
         {dna.length > 0 && (
-          <div className="px-7 pb-5">
-            <div className="font-mono text-[11px] text-secondary tracking-widest uppercase mb-2.5">
+          <div className="px-5 pt-3 pb-4">
+            <p className="font-roboto-mono text-[9px] text-muted tracking-wider uppercase mb-2">
               Collector DNA
-            </div>
-            <div className="dna-bar">
-              {dna.map((archetype, index) => (
-                <div
-                  key={archetype.name}
-                  className={`dna-segment ${archetype.color}`}
-                  style={{ flex: flexValues[index] }}
-                >
-                  {archetype.name}
-                </div>
-              ))}
-            </div>
+            </p>
+            <DNABar archetypes={dna} />
           </div>
         )}
 
-        {/* Footer watermark */}
-        <div className="border-t border-[var(--color-border)] px-7 py-3.5">
+        {/* Footer */}
+        <div
+          className="px-5 py-3"
+          style={{
+            backgroundColor: 'var(--color-bg-surface)',
+            borderTop: '1px solid var(--color-border-subtle)',
+          }}
+        >
           <div className="flex items-center justify-between">
-            <span className="font-logo text-[13px] font-semibold tracking-widest">
-              <span className="text-brick">sotc</span>
+            <span className="font-oswald text-[12px] font-medium tracking-widest uppercase">
+              <span style={{ color: 'var(--color-gshock-red)' }}>sotc</span>
               <span className="text-secondary">.app</span>
             </span>
-            <span className="font-mono text-[11px] text-secondary tracking-wider">
-              {new Date().toLocaleDateString('en-US', {
-                month: 'short',
-                year: 'numeric',
-              }).toUpperCase()}
+            <span className="font-roboto-mono text-[10px] text-muted tracking-wider">
+              {date}
             </span>
           </div>
         </div>
