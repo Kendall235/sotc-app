@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import type { WatchTier } from '../utils/watchTiers';
-import { abbreviateModel } from '../utils/abbreviateModel';
 
 interface EditableChipProps {
   value: string;
   originalValue: string;
   tier: WatchTier;
   onChange: (newValue: string) => void;
-  maxChars?: number; // Max characters before abbreviation kicks in
+  fontSize?: number; // Font size in pixels (default 11)
 }
 
 /**
@@ -44,7 +43,13 @@ function getTierStyles(tier: WatchTier) {
  * EditableChip - Click-to-edit chip component
  * Following EditableTitle.tsx pattern for inline editing
  */
-export function EditableChip({ value, originalValue, tier, onChange, maxChars = 18 }: EditableChipProps) {
+export function EditableChip({
+  value,
+  originalValue,
+  tier,
+  onChange,
+  fontSize = 11,
+}: EditableChipProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -115,7 +120,7 @@ export function EditableChip({ value, originalValue, tier, onChange, maxChars = 
           onKeyDown={handleKeyDown}
           style={{
             fontFamily: 'var(--font-roboto-mono)',
-            fontSize: '11px',
+            fontSize: `${fontSize}px`,
             fontWeight: 600,
             lineHeight: '1',
             color: '#E8E5DC',
@@ -141,7 +146,7 @@ export function EditableChip({ value, originalValue, tier, onChange, maxChars = 
         cursor: 'pointer',
         transition: 'transform 0.15s ease, border-color 0.15s ease',
         whiteSpace: 'nowrap',
-        overflow: 'hidden',
+        maxWidth: '100%',
       }}
       title={value}
       onMouseEnter={(e) => {
@@ -155,27 +160,17 @@ export function EditableChip({ value, originalValue, tier, onChange, maxChars = 
         className="editable-chip-text"
         style={{
           fontFamily: 'var(--font-roboto-mono)',
-          fontSize: '11px',
+          fontSize: `${fontSize}px`,
           fontWeight: 600,
           lineHeight: '1',
           color: styles.textColor,
           letterSpacing: '0.02em',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
           display: 'block',
         }}
       >
-        {abbreviateModel(value, maxChars)}
+        {value}
         {isEdited && (
-          <span
-            style={{
-              marginLeft: '4px',
-              fontSize: '8px',
-              opacity: 0.6,
-            }}
-          >
-            *
-          </span>
+          <span style={{ marginLeft: '4px', fontSize: '8px', opacity: 0.6 }}>*</span>
         )}
       </span>
     </div>

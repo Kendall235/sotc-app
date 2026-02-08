@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { EditableChip } from './EditableChip';
 import type { WatchWithTier } from '../utils/watchTiers';
-import { getMaxCharsForGrid } from '../utils/abbreviateModel';
 
 interface SpatialChipGridProps {
   watches: WatchWithTier[];
@@ -11,22 +10,9 @@ interface SpatialChipGridProps {
   onModelEdit: (index: number, newValue: string) => void;
 }
 
-// Extended watch type with position info
-type WatchWithPosition = WatchWithTier & {
-  originalIndex: number;
-  parsedRow: number;
-  parsedCol: number;
-};
-
-// Maximum number of chips to display
 const MAX_CHIPS = 18;
 
-/**
- * Parse position string to extract row and column
- * Reused from PhotoOverlay.tsx
- */
 function parsePosition(position: string): { row: number; col: number } {
-  // Try new structured format first: "row-N-pos-M"
   const structuredMatch = position.match(/row-(\d+)-pos-(\d+)/i);
   if (structuredMatch) {
     return {
@@ -35,7 +21,6 @@ function parsePosition(position: string): { row: number; col: number } {
     };
   }
 
-  // Fallback to legacy parsing
   const pos = position.toLowerCase();
   let row = 1;
   let col = 1;
@@ -48,7 +33,6 @@ function parsePosition(position: string): { row: number; col: number } {
   else if (pos.includes('center') || pos.includes('middle')) col = 2;
   else if (pos.includes('right')) col = 3;
 
-  // Try to extract numbers from position string
   const rowMatch = pos.match(/row\s*(\d+)/i);
   const colMatch = pos.match(/(\d+)(?:st|nd|rd|th)?\s*(?:from\s*left|position|pos)/i);
   if (rowMatch) row = parseInt(rowMatch[1], 10);
@@ -57,71 +41,78 @@ function parsePosition(position: string): { row: number; col: number } {
   return { row, col };
 }
 
-/**
- * SpatialChipGrid - CSS Grid of editable chips matching photo layout
- * Chips appear BELOW the hero photo, arranged in a grid that mirrors
- * the watch positions in the photo.
- */
 export function SpatialChipGrid({
   watches,
-  gridRows,
-  gridCols,
   editedModels,
   onModelEdit,
 }: SpatialChipGridProps) {
-  // Parse positions and prepare grid data
-  const gridData = useMemo(() => {
-    // Create a 2D array to hold watches by position
-    const grid: WatchWithPosition[][] = Array.from(
-      { length: gridRows },
-      () => []
-    );
-
-    watches.forEach((watch, index) => {
+  // Parse positions for all watches
+  const watchesWithPositions = useMemo(() => {
+    return watches.map((watch, index) => {
       const { row, col } = parsePosition(watch.position);
-      // Ensure row is within bounds
-      const safeRow = Math.min(Math.max(row - 1, 0), gridRows - 1);
-      grid[safeRow].push({
+      return {
         ...watch,
         originalIndex: index,
         parsedRow: row,
         parsedCol: col,
-      });
+      };
+    });
+  }, [watches]);
+
+  // Calculate actual grid dimensions from MAX parsed positions
+  const actualGridDimensions = useMemo(() => {
+    let maxRow = 1;
+    let maxCol = 1;
+
+    watchesWithPositions.forEach((watch) => {
+      if (watch.parsedRow > maxRow) maxRow = watch.parsedRow;
+      if (watch.parsedCol > maxCol) maxCol = watch.parsedCol;
     });
 
-    // Sort each row by column position
-    grid.forEach((row) => {
-      row.sort((a, b) => a.parsedCol - b.parsedCol);
+    return { rows: maxRow, cols: maxCol };
+  }, [watchesWithPositions]);
+
+  // Sort by row then column, respecting MAX_CHIPS limit
+  const displayWatches = useMemo(() => {
+    const sorted = [...watchesWithPositions].sort((a, b) => {
+      if (a.parsedRow !== b.parsedRow) return a.parsedRow - b.parsedRow;
+      return a.parsedCol - b.parsedCol;
     });
+    return sorted.slice(0, MAX_CHIPS);
+  }, [watchesWithPositions]);
 
-    return grid;
-  }, [watches, gridRows]);
+  // Calculate optimal font size based on grid dimensions and longest model name
+  const optimalFontSize = useMemo(() => {
+    const CARD_WIDTH = 600;
+    const CARD_PADDING = 16 * 2; // left + right
+    const GAP = 8;
+    const CHIP_PADDING = 19; // 6 + 10 + 3px border
+    const CHAR_WIDTH_RATIO = 0.65; // Roboto Mono character width ratio
+    const MIN_FONT_SIZE = 7;
+    const MAX_FONT_SIZE = 11;
 
-  // Flatten for display, respecting MAX_CHIPS limit
-  const flatWatches = useMemo(() => {
-    const flat: (WatchWithPosition & { row: number; col: number })[] = [];
+    const cols = actualGridDimensions.cols;
+    const gridWidth = CARD_WIDTH - CARD_PADDING;
+    const totalGaps = (cols - 1) * GAP;
+    const colWidth = (gridWidth - totalGaps) / cols;
+    const textWidth = colWidth - CHIP_PADDING;
 
-    gridData.forEach((row, rowIndex) => {
-      row.forEach((watch, colIndex) => {
-        flat.push({
-          ...watch,
-          row: rowIndex + 1,
-          col: colIndex + 1,
-        });
-      });
-    });
+    // Find longest model name
+    const longestName = displayWatches.reduce(
+      (max, w) => Math.max(max, w.model_number.length),
+      0
+    );
 
-    return flat;
-  }, [gridData]);
+    // Calculate font size that fits longest name
+    // textWidth = longestName * CHAR_WIDTH_RATIO * fontSize
+    // fontSize = textWidth / (longestName * CHAR_WIDTH_RATIO)
+    const calculatedSize = Math.floor(textWidth / (longestName * CHAR_WIDTH_RATIO));
 
-  const displayWatches = flatWatches.slice(0, MAX_CHIPS);
-  const extraCount = flatWatches.length - MAX_CHIPS;
+    return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, calculatedSize));
+  }, [actualGridDimensions.cols, displayWatches]);
 
-  // Determine if we need smaller chips for large collections
+  const extraCount = watchesWithPositions.length - MAX_CHIPS;
   const isLargeCollection = watches.length > 12;
-
-  // Calculate max chars based on grid columns for smart abbreviation
-  const maxChars = getMaxCharsForGrid(gridCols);
 
   if (watches.length === 0) {
     return null;
@@ -137,7 +128,8 @@ export function SpatialChipGrid({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+          gridTemplateColumns: `repeat(${actualGridDimensions.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${actualGridDimensions.rows}, auto)`,
           gap: '8px',
         }}
       >
@@ -148,32 +140,25 @@ export function SpatialChipGrid({
             <div
               key={`${watch.model_number}-${watch.originalIndex}`}
               style={{
-                gridColumn: watch.col,
-                gridRow: watch.row,
-                minWidth: 0, // Allow shrinking in grid
-                overflow: 'hidden',
+                gridColumn: watch.parsedCol,
+                gridRow: watch.parsedRow,
+                minWidth: 0,
               }}
             >
               <EditableChip
                 value={displayValue}
                 originalValue={watch.model_number}
                 tier={watch.tier}
+                fontSize={optimalFontSize}
                 onChange={(newValue) => onModelEdit(watch.originalIndex, newValue)}
-                maxChars={maxChars}
               />
             </div>
           );
         })}
       </div>
 
-      {/* "+N more" indicator for large collections */}
       {extraCount > 0 && (
-        <div
-          style={{
-            marginTop: '12px',
-            textAlign: 'center',
-          }}
-        >
+        <div style={{ marginTop: '12px', textAlign: 'center' }}>
           <span
             style={{
               fontFamily: 'var(--font-roboto-mono)',
