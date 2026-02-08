@@ -2,6 +2,7 @@ import type { Archetype, ArchetypeColor } from '../utils/collectorDNA';
 
 interface DNABarProps {
   archetypes: Archetype[];
+  cardWidth?: number;
 }
 
 // Map archetype colors to more vivid, distinct colors
@@ -30,7 +31,7 @@ const otherColors = { bg: '#3A3A42', text: '#A8A5A0' };
 // Threshold for grouping into OTHER
 const otherThreshold = 10;
 
-export function DNABar({ archetypes }: DNABarProps) {
+export function DNABar({ archetypes, cardWidth = 600 }: DNABarProps) {
   if (archetypes.length === 0) {
     return null;
   }
@@ -77,36 +78,42 @@ export function DNABar({ archetypes }: DNABarProps) {
         gap: '2px',
       }}
     >
-      {displaySegments.map((segment, i) => (
-        <div
-          key={i}
-          style={{
-            flex: segment.percentage,
-            backgroundColor: segment.colors.bg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 6px',
-            minWidth: '40px',
-          }}
-        >
-          <span
+      {displaySegments.map((segment, i) => {
+        // Calculate explicit pixel width for consistent SVG rendering
+        // Container: cardWidth - 40px padding (px-5 = 20px each side)
+        // Subtract gaps: (segments - 1) * 2px
+        const availableWidth = cardWidth - 40 - (displaySegments.length - 1) * 2;
+        const segmentWidth = Math.max(40, (segment.percentage / 100) * availableWidth);
+
+        return (
+          <div
+            key={i}
             style={{
-              fontFamily: 'var(--font-oswald)',
-              fontSize: '11px',
-              fontWeight: 500,
-              color: segment.colors.text,
-              letterSpacing: '0.3px',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              width: `${segmentWidth}px`,
+              flexShrink: 0,
+              backgroundColor: segment.colors.bg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 6px',
             }}
           >
-            {segment.name}
-          </span>
-        </div>
-      ))}
+            <span
+              style={{
+                fontFamily: 'var(--font-oswald)',
+                fontSize: '11px',
+                fontWeight: 500,
+                color: segment.colors.text,
+                letterSpacing: '0.3px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {segment.name}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

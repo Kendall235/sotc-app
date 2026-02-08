@@ -1,8 +1,44 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useMemo } from 'react';
 import { toPng } from 'html-to-image';
 import { ensureFontsLoaded } from '../utils/fontLoader';
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error';
+
+/**
+ * Convert a data URL to a File object for Web Share API
+ */
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const [header, base64Data] = dataUrl.split(',');
+  const mimeType = header.match(/:(.*?);/)?.[1] || 'image/png';
+  const byteString = atob(base64Data);
+  const arrayBuffer = new Uint8Array(byteString.length);
+  for (let i = 0; i < byteString.length; i++) {
+    arrayBuffer[i] = byteString.charCodeAt(i);
+  }
+  return new File([arrayBuffer], filename, { type: mimeType });
+}
+
+/**
+ * Check if the browser supports sharing files via Web Share API
+ */
+function canShareFiles(): boolean {
+  if (!navigator.share || !navigator.canShare) return false;
+  try {
+    const testFile = new File([''], 'test.png', { type: 'image/png' });
+    return navigator.canShare({ files: [testFile] });
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Detect if user is on a mobile device
+ */
+function isMobileDevice(): boolean {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+}
 
 interface ShareButtonsProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
@@ -20,6 +56,10 @@ export function ShareButtons({ cardRef, cardId }: ShareButtonsProps) {
   const [copyState, setCopyState] = useState<ButtonState>('idle');
   const [downloadState, setDownloadState] = useState<ButtonState>('idle');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Check if on mobile for button text and share behavior
+  const isMobile = useMemo(() => isMobileDevice(), []);
+  const supportsFileShare = useMemo(() => canShareFiles(), []);
 
   const clearTimeouts = () => {
     if (timeoutRef.current) {
@@ -99,9 +139,33 @@ export function ShareButtons({ cardRef, cardId }: ShareButtonsProps) {
         throw new Error('All export attempts failed');
       }
 
-      // Download
+      const filename = `sotc-collection-${Date.now()}.png`;
+
+      // On mobile with file sharing support, use Web Share API
+      if (isMobile && supportsFileShare) {
+        const file = dataUrlToFile(dataUrl, filename);
+        try {
+          await navigator.share({
+            files: [file],
+            title: 'My G-Shock Collection',
+          });
+          setDownloadState('success');
+          timeoutRef.current = setTimeout(() => setDownloadState('idle'), 2000);
+          return;
+        } catch (err) {
+          // If user cancelled, don't show error
+          if ((err as Error).name === 'AbortError') {
+            setDownloadState('idle');
+            return;
+          }
+          // Fall through to anchor download
+          console.warn('Share failed, falling back to download:', err);
+        }
+      }
+
+      // Fallback: anchor download (works on desktop, may not work on iOS Safari)
       const link = document.createElement('a');
-      link.download = `sotc-collection-${Date.now()}.png`;
+      link.download = filename;
       link.href = dataUrl;
       link.click();
 
@@ -189,7 +253,7 @@ export function ShareButtons({ cardRef, cardId }: ShareButtonsProps) {
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            Downloaded!
+            {isMobile ? 'Saved!' : 'Downloaded!'}
           </>
         ) : downloadState === 'error' ? (
           <>
@@ -200,10 +264,16 @@ export function ShareButtons({ cardRef, cardId }: ShareButtonsProps) {
           </>
         ) : (
           <>
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download PNG
+            {isMobile ? (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            )}
+            {isMobile ? 'Save Image' : 'Download PNG'}
           </>
         )}
       </button>

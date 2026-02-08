@@ -1,4 +1,4 @@
-import { forwardRef, useState, useMemo, useCallback } from 'react';
+import { forwardRef, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { CollectionAnalysis } from '../types/collection';
 import { PhotoFrame } from './PhotoFrame';
 import { SpatialChipGrid } from './SpatialChipGrid';
@@ -18,6 +18,20 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
   function CollectionCard({ analysis, photoUrl, cardId }, ref) {
     const [cardTitle, setCardTitle] = useState('G-SHOCK COLLECTION');
     const [editedModels, setEditedModels] = useState<Map<number, string>>(new Map());
+    const [cardWidth, setCardWidth] = useState(600);
+    const cardContainerRef = useRef<HTMLDivElement | null>(null);
+
+    // Measure actual card width with ResizeObserver
+    useEffect(() => {
+      const element = cardContainerRef.current;
+      if (!element) return;
+
+      const observer = new ResizeObserver(([entry]) => {
+        setCardWidth(entry.contentRect.width);
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    }, []);
 
     // Handler for model edits
     const handleModelEdit = useCallback((index: number, newValue: string) => {
@@ -56,9 +70,22 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
       })
       .toUpperCase();
 
+    // Merge refs for both forwarded ref and local measurement ref
+    const setRefs = useCallback(
+      (node: HTMLDivElement | null) => {
+        cardContainerRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
+
     return (
       <div
-        ref={ref}
+        ref={setRefs}
         className="collection-card overflow-hidden"
         style={{
           width: '600px',
@@ -110,6 +137,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
           gridCols={analysis.grid_cols}
           editedModels={editedModels}
           onModelEdit={handleModelEdit}
+          cardWidth={cardWidth}
         />
 
         {/* Stats Bar */}
@@ -126,7 +154,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
             <p className="font-roboto-mono text-[9px] text-muted tracking-wider uppercase mb-2">
               Collector DNA
             </p>
-            <DNABar archetypes={dna} />
+            <DNABar archetypes={dna} cardWidth={cardWidth} />
           </div>
         )}
 

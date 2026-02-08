@@ -8,6 +8,7 @@ interface SpatialChipGridProps {
   gridCols: number;
   editedModels: Map<number, string>;
   onModelEdit: (index: number, newValue: string) => void;
+  cardWidth?: number;
 }
 
 const MAX_CHIPS = 18;
@@ -45,6 +46,7 @@ export function SpatialChipGrid({
   watches,
   editedModels,
   onModelEdit,
+  cardWidth = 600,
 }: SpatialChipGridProps) {
   // Parse positions for all watches
   const watchesWithPositions = useMemo(() => {
@@ -83,7 +85,6 @@ export function SpatialChipGrid({
 
   // Calculate optimal font size based on grid dimensions and longest model name
   const optimalFontSize = useMemo(() => {
-    const CARD_WIDTH = 600;
     const CARD_PADDING = 16 * 2; // left + right
     const GAP = 8;
     const CHIP_PADDING = 19; // 6 + 10 + 3px border
@@ -92,7 +93,7 @@ export function SpatialChipGrid({
     const MAX_FONT_SIZE = 11;
 
     const cols = actualGridDimensions.cols;
-    const gridWidth = CARD_WIDTH - CARD_PADDING;
+    const gridWidth = cardWidth - CARD_PADDING;
     const totalGaps = (cols - 1) * GAP;
     const colWidth = (gridWidth - totalGaps) / cols;
     const textWidth = colWidth - CHIP_PADDING;
@@ -109,7 +110,7 @@ export function SpatialChipGrid({
     const calculatedSize = Math.floor(textWidth / (longestName * CHAR_WIDTH_RATIO));
 
     return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, calculatedSize));
-  }, [actualGridDimensions.cols, displayWatches]);
+  }, [actualGridDimensions.cols, displayWatches, cardWidth]);
 
   const extraCount = watchesWithPositions.length - MAX_CHIPS;
   const isLargeCollection = watches.length > 12;

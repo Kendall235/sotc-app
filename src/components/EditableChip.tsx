@@ -127,7 +127,8 @@ export function EditableChip({
             background: 'transparent',
             border: 'none',
             outline: 'none',
-            width: '140px',
+            width: '100%',
+            maxWidth: '100%',
             caretColor: 'var(--color-gshock-red)',
           }}
         />

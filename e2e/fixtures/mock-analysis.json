@@ -1,0 +1,75 @@
+{
+  "success": true,
+  "data": {
+    "total_watches": 6,
+    "watches": [
+      {
+        "model_number": "GW-5000U-1JF",
+        "series": "Square/5600",
+        "display_type": "Digital",
+        "colorway": "Black",
+        "notable_features": ["Solar", "MB6"],
+        "confidence": "high",
+        "position": "row-1-pos-1"
+      },
+      {
+        "model_number": "GMW-B5000D-1",
+        "series": "Square/5600",
+        "display_type": "Digital",
+        "colorway": "Silver",
+        "notable_features": ["Solar", "Full Metal", "Bluetooth"],
+        "confidence": "high",
+        "position": "row-1-pos-2"
+      },
+      {
+        "model_number": "GA-2100-1A1",
+        "series": "CasiOak/2100",
+        "display_type": "Ana-Digi",
+        "colorway": "Black",
+        "notable_features": ["Carbon Core"],
+        "confidence": "high",
+        "position": "row-1-pos-3"
+      },
+      {
+        "model_number": "GWF-A1000-1A",
+        "series": "Frogman",
+        "display_type": "Digital",
+        "colorway": "Black",
+        "notable_features": ["Solar", "ISO Diver", "Depth Sensor"],
+        "confidence": "high",
+        "position": "row-2-pos-1"
+      },
+      {
+        "model_number": "DW-6900BB-1",
+        "series": "Classic/6900",
+        "display_type": "Digital",
+        "colorway": "Black",
+        "notable_features": [],
+        "confidence": "high",
+        "position": "row-2-pos-2"
+      },
+      {
+        "model_number": "GA-110GB-1A",
+        "series": "GA-110",
+        "display_type": "Ana-Digi",
+        "colorway": "Black/Gold",
+        "notable_features": ["Gold Accents"],
+        "confidence": "medium",
+        "position": "row-2-pos-3"
+      }
+    ],
+    "series_breakdown": {
+      "Square/5600": 2,
+      "CasiOak/2100": 1,
+      "Frogman": 1,
+      "Classic/6900": 1,
+      "GA-110": 1
+    },
+    "collection_highlights": [
+      "Nice mix of digital and ana-digi pieces",
+      "Full Metal GMW-B5000D is a premium centerpiece"
+    ],
+    "grid_rows": 2,
+    "grid_cols": 3
+  }
+}

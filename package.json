@@ -9,15 +9,18 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "pages:dev": "wrangler pages dev dist --live-reload",
-    "pages:deploy": "npm run build && wrangler pages deploy dist"
+    "pages:deploy": "npm run build && wrangler pages deploy dist",
+    "test:e2e": "playwright test",
+    "test:e2e:mobile": "playwright test --project=mobile-chrome --project=mobile-safari"
   },
   "dependencies": {
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.11",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.41.0",
     "@cloudflare/workers-types": "^4.20241230.0",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/vite": "^4.1.18",
