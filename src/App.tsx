@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Hero } from './components/Hero';
 import { Footer } from './components/Footer';
@@ -15,19 +15,66 @@ import { ExampleCards } from './components/ExampleCards';
 import { LandingV1 } from './pages/LandingV1';
 import { LandingV2 } from './pages/LandingV2';
 import { LandingV3 } from './pages/LandingV3';
+import { DevPreview } from './DevPreview';
 import { processImage, createPreviewUrl } from './utils/imageProcessing';
-import { analyzeCollection, ApiError } from './services/api';
+import { analyzeCollection, fetchCard, ApiError } from './services/api';
 import type { AppState, AppError, CollectionAnalysis } from './types/collection';
 
+// Check if we're in dev mode and on /dev path
+const isDevPreview = import.meta.env.DEV && window.location.pathname === '/dev';
+
+// Check if URL contains a card ID (5 alphanumeric characters) - computed outside component
+function getCardIdFromUrl(): string | null {
+  const path = window.location.pathname;
+  const match = path.match(/^\/([a-zA-Z0-9]{5})$/);
+  return match ? match[1] : null;
+}
+
 function App() {
-  const [state, setState] = useState<AppState>('idle');
+  // Compute initial cardId from URL before first render
+  const initialCardId = useMemo(() => getCardIdFromUrl(), []);
+
+  const [state, setState] = useState<AppState>(initialCardId ? 'processing' : 'idle');
   const [error, setError] = useState<AppError | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [, setProcessedImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<CollectionAnalysis | null>(null);
+  const [cardId, setCardId] = useState<string | undefined>(undefined);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const lastFile = useRef<File | null>(null);
+  const cardLoadAttempted = useRef(false);
+
+  // Fetch card if ID in URL (only runs once on mount)
+  useEffect(() => {
+    if (!initialCardId || cardLoadAttempted.current) return;
+    cardLoadAttempted.current = true;
+
+    fetchCard(initialCardId)
+      .then((savedCard) => {
+        setAnalysis(savedCard.analysis);
+        setPreviewUrl(savedCard.photoBase64);
+        setCardId(savedCard.id);
+        setState('result');
+      })
+      .catch((err) => {
+        console.error('Failed to load card:', err);
+        if (err instanceof ApiError) {
+          setError({
+            type: err.type,
+            message: err.message,
+            retryable: false,
+          });
+        } else {
+          setError({
+            type: 'api_error',
+            message: 'Failed to load card. It may have been deleted.',
+            retryable: false,
+          });
+        }
+        setState('error');
+      });
+  }, [initialCardId]);
 
   // Get variant from URL query param (?v=1, ?v=2, ?v=3)
   const variant = useMemo(() => {
@@ -52,7 +99,14 @@ function App() {
 
       // Analyze with AI
       const result = await analyzeCollection(processed.base64);
-      setAnalysis(result);
+      setAnalysis(result.analysis);
+      setCardId(result.cardId);
+
+      // Update URL to reflect the new card ID (without page reload)
+      if (result.cardId) {
+        window.history.pushState({}, '', `/${result.cardId}`);
+      }
+
       setState('result');
     } catch (err) {
       console.error('Error processing image:', err);
@@ -92,7 +146,10 @@ function App() {
     setPreviewUrl(null);
     setProcessedImage(null);
     setAnalysis(null);
+    setCardId(undefined);
     lastFile.current = null;
+    // Reset URL to home
+    window.history.pushState({}, '', '/');
   }, []);
 
   const handleNewUpload = useCallback(() => {
@@ -136,6 +193,11 @@ function App() {
         );
     }
   };
+
+  // Render DevPreview in dev mode when on /dev path
+  if (isDevPreview) {
+    return <DevPreview />;
+  }
 
   return (
     <Layout>
@@ -215,10 +277,11 @@ function App() {
               ref={cardRef}
               analysis={analysis}
               photoUrl={previewUrl}
+              cardId={cardId}
             />
 
             {/* Actions */}
-            <ShareButtons cardRef={cardRef} />
+            <ShareButtons cardRef={cardRef} cardId={cardId} />
             <button
               onClick={handleNewUpload}
               className="btn-ghost"

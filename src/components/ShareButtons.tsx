@@ -1,14 +1,22 @@
 import { useCallback, useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
+import { ensureFontsLoaded } from '../utils/fontLoader';
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error';
 
 interface ShareButtonsProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
-  shareUrl?: string;
+  cardId?: string;
 }
 
-export function ShareButtons({ cardRef, shareUrl = 'https://sotc.app' }: ShareButtonsProps) {
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [150, 300, 500];
+
+export function ShareButtons({ cardRef, cardId }: ShareButtonsProps) {
+  // Construct share URL from cardId
+  const shareUrl = cardId
+    ? `https://sotc.app/${cardId}`
+    : 'https://sotc.app';
   const [copyState, setCopyState] = useState<ButtonState>('idle');
   const [downloadState, setDownloadState] = useState<ButtonState>('idle');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -18,6 +26,18 @@ export function ShareButtons({ cardRef, shareUrl = 'https://sotc.app' }: ShareBu
       clearTimeout(timeoutRef.current);
     }
   };
+
+  const handleCopyLink = useCallback(async () => {
+    clearTimeouts();
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyState('success');
+      timeoutRef.current = setTimeout(() => setCopyState('idle'), 2000);
+    } catch {
+      setCopyState('error');
+      timeoutRef.current = setTimeout(() => setCopyState('idle'), 2000);
+    }
+  }, [shareUrl]);
 
   const handleShare = useCallback(async () => {
     const shareData = {
@@ -39,19 +59,7 @@ export function ShareButtons({ cardRef, shareUrl = 'https://sotc.app' }: ShareBu
       // Fallback to copy link
       handleCopyLink();
     }
-  }, [shareUrl]);
-
-  const handleCopyLink = useCallback(async () => {
-    clearTimeouts();
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopyState('success');
-      timeoutRef.current = setTimeout(() => setCopyState('idle'), 2000);
-    } catch {
-      setCopyState('error');
-      timeoutRef.current = setTimeout(() => setCopyState('idle'), 2000);
-    }
-  }, [shareUrl]);
+  }, [shareUrl, handleCopyLink]);
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current || downloadState === 'loading') return;
@@ -60,16 +68,41 @@ export function ShareButtons({ cardRef, shareUrl = 'https://sotc.app' }: ShareBu
     setDownloadState('loading');
 
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#111114',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
+      let dataUrl: string | null = null;
+      let attempts = 0;
 
+      while (!dataUrl && attempts < MAX_RETRIES) {
+        // Ensure fonts are loaded
+        const fontsReady = await ensureFontsLoaded();
+        if (!fontsReady) {
+          console.warn(`Font loading incomplete (attempt ${attempts + 1})`);
+        }
+
+        // Delay increases with each attempt
+        const delay = RETRY_DELAYS[attempts] || 500;
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        try {
+          dataUrl = await toPng(cardRef.current, {
+            backgroundColor: '#1A1917',
+            pixelRatio: 2,
+            cacheBust: true,
+          });
+        } catch (renderError) {
+          console.warn(`Render attempt ${attempts + 1} failed:`, renderError);
+        }
+
+        attempts++;
+      }
+
+      if (!dataUrl) {
+        throw new Error('All export attempts failed');
+      }
+
+      // Download
       const link = document.createElement('a');
       link.download = `sotc-collection-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
 
       setDownloadState('success');

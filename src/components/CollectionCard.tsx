@@ -11,10 +11,11 @@ import { addTiersToWatches, countByTier } from '../utils/watchTiers';
 interface CollectionCardProps {
   analysis: CollectionAnalysis;
   photoUrl: string | null;
+  cardId?: string;
 }
 
 export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
-  function CollectionCard({ analysis, photoUrl }, ref) {
+  function CollectionCard({ analysis, photoUrl, cardId }, ref) {
     const [cardTitle, setCardTitle] = useState('G-SHOCK COLLECTION');
     const [editedModels, setEditedModels] = useState<Map<number, string>>(new Map());
 
@@ -75,7 +76,15 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
           <div className="flex-1 min-w-0 pr-4">
             <EditableTitle value={cardTitle} onChange={setCardTitle} />
             <p className="font-roboto-mono text-[10px] text-muted tracking-wider uppercase mt-1">
-              {date} · SOTC
+              {cardId ? (
+                <>
+                  <span style={{ color: 'var(--color-gshock-red)' }}>sotc</span>
+                  <span>.app/{cardId}</span>
+                  <span> · {date}</span>
+                </>
+              ) : (
+                <>{date} · SOTC</>
+              )}
             </p>
           </div>
           <div className="text-right flex-shrink-0">
@@ -133,6 +142,7 @@ export const CollectionCard = forwardRef<HTMLDivElement, CollectionCardProps>(
             <span className="font-oswald text-[12px] font-medium tracking-widest uppercase">
               <span style={{ color: 'var(--color-gshock-red)' }}>sotc</span>
               <span className="text-secondary">.app</span>
+              {cardId && <span className="text-muted">/{cardId}</span>}
             </span>
             <span className="font-roboto-mono text-[10px] text-muted tracking-wider">
               {date}

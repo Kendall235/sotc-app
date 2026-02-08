@@ -23,6 +23,13 @@ export const CollectionAnalysisSchema = z.object({
   series_breakdown: z.record(z.string(), z.number()),
   grid_rows: z.number().int().min(1),
   grid_cols: z.number().int().min(1),
+  row_counts: z.array(z.number()).optional(),
+  _debug: z.object({
+    row_counts: z.array(z.number()).nullable(),
+    positioning_method: z.string(),
+    grid_rows: z.number(),
+    grid_cols: z.number(),
+  }).optional(),
 });
 
 // TypeScript types derived from Zod schemas
@@ -44,6 +51,15 @@ export interface AppError {
 export interface AnalyzeResponse {
   success: true;
   data: CollectionAnalysis;
+  cardId?: string;
+}
+
+// Saved card from KV
+export interface SavedCard {
+  id: string;
+  created: string;
+  analysis: CollectionAnalysis;
+  photoBase64: string;
 }
 
 export interface AnalyzeErrorResponse {

@@ -4,3 +4,9 @@ pages_build_output_dir = "dist"
 
 # Environment variables are set in the Cloudflare dashboard
 # ANTHROPIC_API_KEY = "sk-ant-..."
+
+# KV Namespaces for card persistence
+[[kv_namespaces]]
+binding = "CARDS"
+id = "5e8fd2a72c134d888c058bf10ba981c9"
+preview_id = "9e1b040788b04dc59d3481eedb55500a"

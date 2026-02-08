@@ -1,7 +1,16 @@
 import { injectWatchImages } from './watch-images';
+import { generateCardId } from '../utils/generateId';
 
 interface Env {
   ANTHROPIC_API_KEY: string;
+  CARDS: KVNamespace;
+}
+
+interface SavedCard {
+  id: string;
+  created: string;
+  analysis: unknown;
+  photoBase64: string;
 }
 
 // Simple in-memory rate limiting (resets on cold start)
@@ -26,36 +35,42 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-const ANALYSIS_PROMPT = `You are a G-Shock watch identification expert. Analyze this collection photo and identify each visible G-Shock watch.
+const ANALYSIS_PROMPT = `You are a G-Shock watch identification expert. Analyze this collection photo.
 
-CRITICAL REQUIREMENTS:
-1. Each watch MUST have a UNIQUE model_number - NO DUPLICATES unless truly identical watches.
-2. Examine distinguishing features carefully: case material (resin vs full-metal), bezel color, dial color, band type, size, and special edition markings.
-3. Look for these common series indicators:
-   - GMW-B5000: Full-metal square cases (silver, gold, black IP, titanium)
-   - DW-5600: Standard resin squares
-   - GW-5000: Screw-back premium squares
-   - GA-2100: CasiOak octagonal bezels
-   - DW-6900: Round face with triple graph
-   - Special editions: NASA, Supreme, BAPE, Porter collaborations have unique markings
+STEP 1 - COUNT ROWS CAREFULLY:
+Look at the photo and determine how watches are physically arranged.
 
-For each watch, provide:
-- model_number: The SPECIFIC model (e.g., "GMW-B5000D-1" for steel, "GMW-B5000-1" for black IP, "DW-5600NASA21-7" for NASA collab). Be precise - different colors/materials = different models.
-- series: The product line (e.g., "Square/5600", "Full Metal", "CasiOak/2100", "Frogman", "Mudmaster")
+CRITICAL ROW RULES:
+- A ROW is a horizontal line of watches whose CENTERS are at roughly the same vertical level
+- Watches do NOT need to be perfectly aligned - slight vertical offsets (due to different watch sizes, angles, or positioning) still count as the SAME ROW
+- If watches overlap vertically in their positions, they are likely in the SAME ROW
+- Most collection photos have 1-3 rows. Be conservative - fewer rows is usually correct.
+- Ask yourself: "If I drew a horizontal line through this row, would it pass through all these watches?"
+
+STEP 2 - COUNT WATCHES PER ROW:
+For each row, count watches from LEFT to RIGHT.
+
+OUTPUT FORMAT:
+
+"row_counts": Array of watch counts per row, top to bottom.
+  - 8 watches in 2 rows of 4 = [4, 4]
+  - 6 watches in 2 rows of 3 = [3, 3]
+  - 9 watches in 3 rows of 3 = [3, 3, 3]
+
+"watches": List ALL watches in reading order (left-to-right, top-to-bottom):
+- model_number: Specific model
+- series: Product line
 - display_type: "Digital", "Analog", or "Ana-Digi"
-- colorway: Brief description (e.g., "Silver Steel", "Stealth Black", "NASA White")
-- notable_features: Array of features (e.g., ["Solar", "Bluetooth", "Full Metal", "Limited Edition"])
-- confidence: "high", "medium", or "low" based on image clarity
-- position: MUST use format "row-N-pos-M" where N is row number from top (1=first row) and M is position from left (1=leftmost). Example: "row-2-pos-4" for second row, fourth watch from left.
+- colorway: Brief description
+- notable_features: Array of features
+- confidence: "high", "medium", or "low"
 
-Also provide:
-- total_watches: Integer count
-- collection_highlights: 2-3 notable observations about the collection
-- series_breakdown: Object with series names as keys and counts as values
-- grid_rows: Total number of rows of watches in the photo (integer)
-- grid_cols: Maximum number of watches in any single row (integer)
+Also include:
+- total_watches: Integer (must equal sum of row_counts)
+- collection_highlights: 2-3 observations
+- series_breakdown: Object with series counts
 
-Return ONLY valid JSON. If you cannot identify a watch clearly, include it with confidence: "low" but still provide your best guess for the model.`;
+Return ONLY valid JSON.`;
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
@@ -256,14 +271,89 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       }
     }
 
+    // Debug: log raw AI response structure
+    console.log('[analyze] row_counts from AI:', analysisData.row_counts);
+    console.log('[analyze] watches count:', analysisData.watches?.length);
+    console.log('[analyze] first watch position:', analysisData.watches?.[0]?.position);
+
+    // Calculate positions from row_counts if provided
+    let positioningMethod = 'none';
+    if (analysisData.row_counts && Array.isArray(analysisData.row_counts) && analysisData.watches) {
+      const rowCounts: number[] = analysisData.row_counts;
+      let watchIndex = 0;
+
+      for (let rowNum = 0; rowNum < rowCounts.length; rowNum++) {
+        const watchesInRow = rowCounts[rowNum];
+        for (let posInRow = 0; posInRow < watchesInRow; posInRow++) {
+          if (watchIndex < analysisData.watches.length) {
+            analysisData.watches[watchIndex].position = `row-${rowNum + 1}-pos-${posInRow + 1}`;
+            watchIndex++;
+          }
+        }
+      }
+
+      // Set grid dimensions from row_counts
+      analysisData.grid_rows = rowCounts.length;
+      analysisData.grid_cols = Math.max(...rowCounts);
+      positioningMethod = 'row_counts';
+      console.log('[analyze] Positions calculated from row_counts:', rowCounts);
+    } else if (analysisData.watches?.[0]?.position) {
+      positioningMethod = 'ai_positions';
+      console.log('[analyze] Using AI-provided positions');
+    }
+
+    // Add debug info to response
+    analysisData._debug = {
+      row_counts: analysisData.row_counts || null,
+      positioning_method: positioningMethod,
+      grid_rows: analysisData.grid_rows,
+      grid_cols: analysisData.grid_cols,
+    };
+
     // Inject watch images from curated database
     if (analysisData.watches && Array.isArray(analysisData.watches)) {
       injectWatchImages(analysisData.watches);
     }
 
+    // Generate unique card ID with collision check
+    let cardId: string = '';
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      cardId = generateCardId();
+      const existing = await env.CARDS.get(cardId);
+      if (!existing) break;
+      attempts++;
+    }
+
+    if (attempts >= maxAttempts) {
+      console.error('Failed to generate unique card ID after', maxAttempts, 'attempts');
+      // Still return the analysis, just without persistence
+      return new Response(JSON.stringify({
+        success: true,
+        data: analysisData,
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Save card to KV
+    const savedCard: SavedCard = {
+      id: cardId,
+      created: new Date().toISOString(),
+      analysis: analysisData,
+      photoBase64: image,
+    };
+
+    await env.CARDS.put(cardId, JSON.stringify(savedCard));
+    console.log('[analyze] Saved card with ID:', cardId);
+
     return new Response(JSON.stringify({
       success: true,
       data: analysisData,
+      cardId: cardId,
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
